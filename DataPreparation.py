@@ -1,9 +1,11 @@
 import os
+import matplotlib.pyplot as plt
 import matplotlib.path as mplPath
+import matplotlib.image as mpimg
 import logging
 import numpy as np
 
-from image_manipulation import concat_n_images
+from image_manipulation import concat_n_images, augment_image
 
 _logger = logging.getLogger(__name__)
 
@@ -101,12 +103,12 @@ def create_dataset(folder):
                 print(img_id, img_coor, file_type)
                 if img_id not in raw_images:
                     raw_images[img_id] = [[0] * 4 for i in range(4)]
-                raw_images[img_id][img_coor[0] - 1][img_coor[1] - 1] = os.path.join(folder, file)
-                # try:
-                #     img = mpimg.imread(os.path.join(folder, file))
-                # except:
-                #     img = np.zeros((913, 872))
-                # raw_images[img_id][img_coor[0] - 1][img_coor[1] - 1] = img
+                # raw_images[img_id][img_coor[0] - 1][img_coor[1] - 1] = os.path.join(folder, file)
+                try:
+                    img = mpimg.imread(os.path.join(folder, file))
+                except:
+                    img = np.zeros((913, 872))
+                raw_images[img_id][img_coor[0] - 1][img_coor[1] - 1] = img
 
     final_images = {}
 
@@ -115,13 +117,27 @@ def create_dataset(folder):
         img_rows = []
         for i in range(4):
             img_rows.append(concat_n_images(img_parts[i], 'horizontal'))
-        final_images[img_id] = concat_n_images(img_)
+        final_images[img_id] = concat_n_images(img_rows, 'vertical')
+        # plt.imshow(final_images[img_id])
+        # plt.show()
+
+        aug_images = augment_image(final_images[img_id], final_images[img_id])
+
+        toshow = concat_n_images([aug_images[0][0], aug_images[6][0]], 'horizontal')
+        plt.imshow(toshow)
+        plt.show()
+        # for img in aug_images:
+        #     plt.imshow(img[0])
+        #     plt.show()
+
+
+
 
     return raw_images
 
 
 if __name__ == "__main__":
-    create_dataset("C:\\Projects\\bone-cell-classifier\\data")
+    create_dataset("data")
 
     # png = "C:\\Projects\\bone-cell-classifier\\data\\B2_01_02.png"
     # json = "C:\\Projects\\bone-cell-classifier\\data\\B2_01_02.json"
