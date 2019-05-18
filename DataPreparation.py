@@ -1,11 +1,15 @@
+import pickle
 import os
 import matplotlib.pyplot as plt
 import matplotlib.path as mplPath
 import matplotlib.image as mpimg
 import logging
 import numpy as np
+from sklearn.model_selection import train_test_split
+from skimage.transform import resize
 
 from image_manipulation import concat_n_images, augment_image
+from models.unet_sample import unet
 
 _logger = logging.getLogger(__name__)
 
@@ -67,12 +71,27 @@ def get_polygons(json_content):
     return polygons
 
 
-def create_label_matrix(img_mat, polygons):
+def create_label_matrix_old(img_mat, polygons):
     lbl_mat = np.zeros(img_mat.shape)
     print(img_mat.shape)
     for polygon in polygons:
         block = (left, right, bottom, top) = polygon.get_min_max_block()
         print(block)
+        for x in range(left, right):
+            for y in range(bottom, top):
+                if polygon.contains_point([x, y]):
+                    lbl_mat[y, x, 0] = polygon.label_int
+                    lbl_mat[y, x, 1] = polygon.label_int
+                    lbl_mat[y, x, 2] = polygon.label_int
+
+    return lbl_mat
+
+
+def create_label_matrix(shape, polygons):
+    lbl_mat = np.zeros(shape)
+    for polygon in polygons:
+        block = (left, right, bottom, top) = polygon.get_min_max_block()
+        # print(block)
         for x in range(left, right):
             for y in range(bottom, top):
                 if polygon.contains_point([x, y]):
@@ -130,14 +149,103 @@ def create_dataset(folder):
         #     plt.imshow(img[0])
         #     plt.show()
 
-
-
-
     return raw_images
 
 
 if __name__ == "__main__":
-    create_dataset("data")
+
+    pkl = open("data/models/original_resized_110519.mdl", "rb")
+    model = pickle.load(pkl)
+    pkl.close()
+
+    pkl = open("data/datasets/split_original_resized_greyscale_110519.pkl", "rb")
+    (X_train, X_test, y_train, y_test) = pickle.load(pkl)
+    pkl.close()
+
+    # score, acc = model.evaluate(X_test, y_test, batch_size=1)
+    # print(f"score={score}, accuracy={acc}")
+
+    res = model.test_on_batch(X_train[:1], y_test[:1])
+    print(res)
+
+
+
+    ##### TRAIN UNET ####
+
+    # pkl = open("data/datasets/original_resized_110519.pkl", "rb")
+    # dataset = pickle.load(pkl)
+    # pkl.close()
+    #
+    # keys_orders = [key for key in sorted(dataset)]
+    # n = len(dataset)
+    # print(f"n={n}, keys={keys_orders}")
+    # X = np.array([dataset[key][0] for key in keys_orders])
+    # Y = np.array([dataset[key][1] for key in keys_orders])
+    #
+    # new_X = np.array([np.reshape(np.dot(X[i], [0.2989, 0.5870, 0.1140]), newshape=(800, 800, 1)) for i in range(n)])
+    # new_Y = np.array([np.reshape(Y[i][:, :, 0], newshape=(800, 800, 1)) for i in range(n)])
+    # # for i in range(n):
+    # #     print(new_X[i].shape)
+    # #     tmp = np.dot(X[i], [0.2989, 0.5870, 0.1140])
+    # #     X[i] = tmp
+    #
+    # X_train, X_test, y_train, y_test = train_test_split(new_X, new_Y, test_size=0.2)
+    #
+    # with open("data/datasets/split_original_resized_greyscale_110519.pkl", "wb") as pickle_out:
+    #     pickle.dump((X_train, X_test, y_train, y_test), pickle_out)
+    #
+    # print(X_train.shape, y_train.shape)
+    # print(X_test.shape, y_test.shape)
+    #
+    # model = unet()
+    # model.fit(X_train, y_train, batch_size=2)
+    #
+    # # print(model.metrics)
+    #
+    # with open("data/models/original_resized_110519.mdl", "wb") as pickle_out:
+    #     pickle.dump(model, pickle_out)
+    #
+    # score, accuracy = model.evaluate(X_test, y_test)
+    # print(f"score={score}, accuracy={accuracy}")
+
+
+
+    ###### create dataset!!! ######
+
+    # names = set()
+    # folder = "data"
+    # for r, d, files in os.walk(folder):
+    #     for file in files:
+    #         name = file.split('.')[0]
+    #         if name not in names:
+    #             names.add(name)
+    #
+    # print(names)
+    #
+    # dataset = {}
+    #
+    # for name in names:
+    #     img_path = os.path.join(folder, f"{name}.png")
+    #     json_path = os.path.join(folder, f"{name}.json")
+    #
+    #     try:
+    #         img_mat = mpimg.imread(img_path)
+    #         with open(json_path) as json_file:
+    #             json_content = json_file.read()
+    #         polygons = get_polygons(json_content)
+    #         lbl_mat = create_label_matrix(img_mat.shape, polygons)
+    #
+    #         re_img_mat = resize(img_mat, output_shape=(800, 800, 3))
+    #         re_lbl_mat = resize(lbl_mat, output_shape=(800, 800, 3))
+    #
+    #         dataset[name] = (re_img_mat, re_lbl_mat)
+    #         print(f"Parsed image {name}")
+    #     except:
+    #         print(f"WARN :: Could not parse image {name}")
+    #
+    # with open("data/datasets/original_resized_110519.pkl", "wb") as pickle_out:
+    #     pickle.dump(dataset, pickle_out)
+
 
     # png = "C:\\Projects\\bone-cell-classifier\\data\\B2_01_02.png"
     # json = "C:\\Projects\\bone-cell-classifier\\data\\B2_01_02.json"
