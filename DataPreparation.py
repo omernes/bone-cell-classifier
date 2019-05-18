@@ -153,21 +153,65 @@ def create_dataset(folder):
 
 
 if __name__ == "__main__":
+    from BoneCellDataset import BoneCellDataset
 
-    pkl = open("data/models/original_resized_110519.mdl", "rb")
-    model = pickle.load(pkl)
-    pkl.close()
+    dataset = BoneCellDataset(name="original")
+    dataset.populate_from_directory("data/raw")
+    dataset.save_dataset("data/datasets")
 
-    pkl = open("data/datasets/split_original_resized_greyscale_110519.pkl", "rb")
-    (X_train, X_test, y_train, y_test) = pickle.load(pkl)
-    pkl.close()
+    X_train, X_test, y_train, y_test = dataset.get_split_dataset()
 
-    # score, acc = model.evaluate(X_test, y_test, batch_size=1)
-    # print(f"score={score}, accuracy={acc}")
+    model = unet()
+    model.fit(X_train, y_train, batch_size=2)
 
-    res = model.test_on_batch(X_train[:1], y_test[:1])
-    print(res)
+    with open("data/models/original_resized_180519_onelabel.mdl", "wb") as pickle_out:
+        pickle.dump(model, pickle_out)
 
+    score, accuracy = model.evaluate(X_test, y_test)
+    print(f"score={score}, accuracy={accuracy}")
+
+    # from BoneCellDataset import BoneCellDataset
+    #
+    # dataset = BoneCellDataset.load_dataset("data/datasets/original_2019-05-18.pkl")
+    # X_train, X_test, y_train, y_test = dataset.get_split_dataset()
+    # print(X_train.shape)
+
+
+
+
+
+
+
+
+
+
+
+    # pkl = open("data/models/original_resized_110519.mdl", "rb")
+    # model = pickle.load(pkl)
+    # pkl.close()
+    #
+    # pkl = open("data/datasets/split_original_resized_greyscale_110519.pkl", "rb")
+    # (X_train, X_test, y_train, y_test) = pickle.load(pkl)
+    # pkl.close()
+    #
+    # # score, acc = model.evaluate(X_test, y_test, batch_size=1)
+    # # print(f"score={score}, accuracy={acc}")
+    #
+    # # res = model.test_on_batch(X_train[:1], y_test[:1])
+    # # print(res)
+    #
+    # res = model.predict(X_test[:1])
+    #
+    # for i in range(800):
+    #     print(f"i={i}, values={np.unique(res[0][i][:])}")
+
+    # print(res[0].shape)
+    #
+    # res = np.reshape(res[0], newshape=(800, 800))
+    # # res = np.array()
+    # print(res.shape)
+    # plt.imshow(res, cmap='hot', interpolation='nearest')
+    # plt.show()
 
 
     ##### TRAIN UNET ####

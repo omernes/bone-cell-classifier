@@ -15,9 +15,9 @@ def augment_image(original_image, labeled_image):
     new_images_set = [(original_image, labeled_image), horizontal_flip, vertical_flip, rotation_270, rotation_180,
                       rotation_90]
     all_images = [*new_images_set]
-    print("adding noise...")
-    for set in new_images_set:
-        all_images.append((random_noise(set[0]), set[1]))
+    # print("adding noise...")
+    # for set in new_images_set:
+    #     all_images.append((random_noise(set[0]), set[1]))
     print("done augmenting!")
     return all_images
 
