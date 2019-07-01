@@ -1,3 +1,5 @@
+from os import getenv
+
 from keras.optimizers import Adam, SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TerminateOnNaN, CSVLogger
 from keras import backend as K
@@ -100,12 +102,14 @@ val_dataset = DataGenerator(load_images_into_memory=False, hdf5_dataset_path=Non
 # TODO: Set the paths to the datasets here.
 
 # The directories that contain the images.
-VOC_2007_images_dir      = 'datasets/VOCdevkit/VOC2007/JPEGImages/'
-VOC_2012_images_dir      = 'datasets/VOCdevkit/VOC2012/JPEGImages/'
+VOC_2007_images_dir      = getenv('IMAGES_DIR_2007', 'datasets/VOCdevkit/VOC2007/JPEGImages/')
+VOC_2012_images_dir      = getenv('IMAGES_DIR_2012', 'datasets/VOCdevkit/VOC2012/JPEGImages/')
+VOC_2007_TEST_images_dir = getenv('IMAGES_DIR_2007_TEST', 'datasets/VOCdevkit/VOC2007/JPEGImages/')
 
 # The directories that contain the annotations.
-VOC_2007_annotations_dir      = 'datasets/VOCdevkit/VOC2007/Annotations/'
-VOC_2012_annotations_dir      = 'datasets/VOCdevkit/VOC2012/Annotations/'
+VOC_2007_annotations_dir      = getenv('ANNOT_DIR_2007','datasets/VOCdevkit/VOC2007/Annotations/')
+VOC_2012_annotations_dir      = getenv('ANNOT_DIR_2012','datasets/VOCdevkit/VOC2012/Annotations/')
+VOC_2007_TEST_annotations_dir = getenv('ANNOT_DIR_2007_TEST','datasets/VOCdevkit/VOC2007/Annotations/')
 
 # The paths to the image sets.
 VOC_2007_train_image_set_filename    = 'datasets/VOCdevkit/VOC2007/ImageSets/Main/train.txt'
@@ -145,9 +149,9 @@ train_dataset.parse_xml(images_dirs=[VOC_2007_images_dir],
                         exclude_difficult=False,
                         ret=False)
 
-val_dataset.parse_xml(images_dirs=[VOC_2007_images_dir],
+val_dataset.parse_xml(images_dirs=[VOC_2007_TEST_images_dir],
                       image_set_filenames=[VOC_2007_test_image_set_filename],
-                      annotations_dirs=[VOC_2007_annotations_dir],
+                      annotations_dirs=[VOC_2007_TEST_annotations_dir],
                       classes=classes,
                       include_classes='all',
                       exclude_truncated=False,
@@ -159,15 +163,15 @@ val_dataset.parse_xml(images_dirs=[VOC_2007_images_dir],
 # option in the constructor, because in that cas the images are in memory already anyway. If you don't
 # want to create HDF5 datasets, comment out the subsequent two function calls.
 
-train_dataset.create_hdf5_dataset(file_path='dataset_pascal_voc_07+12_trainval.h5',
-                                  resize=False,
-                                  variable_image_size=True,
-                                  verbose=True)
-
-val_dataset.create_hdf5_dataset(file_path='dataset_pascal_voc_07_test.h5',
-                                resize=False,
-                                variable_image_size=True,
-                                verbose=True)
+# train_dataset.create_hdf5_dataset(file_path='dataset_pascal_voc_07+12_trainval.h5',
+#                                   resize=False,
+#                                   variable_image_size=True,
+#                                   verbose=True)
+#
+# val_dataset.create_hdf5_dataset(file_path='dataset_pascal_voc_07_test.h5',
+#                                 resize=False,
+#                                 variable_image_size=True,
+#                                 verbose=True)
 
 
 
