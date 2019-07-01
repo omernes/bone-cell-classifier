@@ -155,20 +155,33 @@ def create_dataset(folder):
 if __name__ == "__main__":
     from BoneCellDataset import BoneCellDataset
 
-    dataset = BoneCellDataset(name="original")
-    dataset.populate_from_directory("data/raw")
-    dataset.save_dataset("data/datasets")
+    # dataset = BoneCellDataset(name="original")
+    # dataset.populate_from_directory("data/raw")
+    # dataset.save_dataset("data/datasets")
 
+    # dataset = BoneCellDataset.load_dataset("data/datasets/original_2019-05-18.pkl")
+    #
+    # X_train, X_test, y_train, y_test = dataset.get_split_dataset()
+    #
+    # model = unet()
+    # model.fit(X_train, y_train, batch_size=2)
+    #
+    # with open("data/models/original_resized_180519_onelabel.mdl", "wb") as pickle_out:
+    #     pickle.dump(model, pickle_out)
+
+    from BoneCellDataset import BoneCellDataset
+
+    dataset = BoneCellDataset.load_dataset("data/datasets/original_2019-05-18.pkl")
     X_train, X_test, y_train, y_test = dataset.get_split_dataset()
+    #
+    with open("data/models/original_resized_180519_onelabel.mdl", "rb") as pkl:
+        model = pickle.load(pkl)
 
-    model = unet()
-    model.fit(X_train, y_train, batch_size=2)
+    # score, accuracy = model.evaluate(X_test, y_test, batch_size=1)
+    # print(f"score={score}, accuracy={accuracy}")
 
-    with open("data/models/original_resized_180519_onelabel.mdl", "wb") as pickle_out:
-        pickle.dump(model, pickle_out)
-
-    score, accuracy = model.evaluate(X_test, y_test)
-    print(f"score={score}, accuracy={accuracy}")
+    res = model.predict(X_test[:1])
+    print(res)
 
     # from BoneCellDataset import BoneCellDataset
     #
