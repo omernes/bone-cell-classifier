@@ -1,3 +1,10 @@
-matplotlib
 numpy
-scikit-image
+keras
+tensorflow
+opencv-python
+beautifulsoup4==4.7.1
+matplotlib
+sklearn
+pillow
+tqdm
+lxml
