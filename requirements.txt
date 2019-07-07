@@ -1,6 +1,7 @@
 numpy
 keras
 tensorflow
+tensorflow-gpu
 opencv-python
 beautifulsoup4==4.7.1
 matplotlib

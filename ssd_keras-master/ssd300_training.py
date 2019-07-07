@@ -112,13 +112,13 @@ VOC_2012_annotations_dir      = getenv('ANNOT_DIR_2012','datasets/VOCdevkit/VOC2
 VOC_2007_TEST_annotations_dir = getenv('ANNOT_DIR_2007_TEST','datasets/VOCdevkit/VOC2007/Annotations/')
 
 # The paths to the image sets.
-VOC_2007_train_image_set_filename    = 'datasets/VOCdevkit/VOC2007/ImageSets/Main/train.txt'
-VOC_2012_train_image_set_filename    = 'datasets/VOCdevkit/VOC2012/ImageSets/Main/train.txt'
-VOC_2007_val_image_set_filename      = 'datasets/VOCdevkit/VOC2007/ImageSets/Main/val.txt'
-VOC_2012_val_image_set_filename      = 'datasets/VOCdevkit/VOC2012/ImageSets/Main/val.txt'
-VOC_2007_trainval_image_set_filename = 'datasets/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt'
-VOC_2012_trainval_image_set_filename = 'datasets/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt'
-VOC_2007_test_image_set_filename     = 'datasets/VOCdevkit/VOC2007/ImageSets/Main/test.txt'
+VOC_2007_train_image_set_filename    = getenv('IMAGESET_TRAIN_2007', 'datasets/VOCdevkit/VOC2007/ImageSets/Main/train.txt')
+VOC_2012_train_image_set_filename    = getenv('IMAGESET_TRAIN_2012', 'datasets/VOCdevkit/VOC2012/ImageSets/Main/train.txt')
+VOC_2007_val_image_set_filename      = getenv('IMAGESET_VAL_2007', 'datasets/VOCdevkit/VOC2007/ImageSets/Main/val.txt')
+VOC_2012_val_image_set_filename      = getenv('IMAGESET_VAL_2012', 'datasets/VOCdevkit/VOC2012/ImageSets/Main/val.txt')
+VOC_2007_trainval_image_set_filename = getenv('IMAGESET_TRAINVAL_2007', 'datasets/VOCdevkit/VOC2007/ImageSets/Main/trainval.txt')
+VOC_2012_trainval_image_set_filename = getenv('IMAGESET_TRAINVAL_2012', 'datasets/VOCdevkit/VOC2012/ImageSets/Main/trainval.txt')
+VOC_2007_test_image_set_filename     = getenv('IMAGESET_TEST_2007', 'datasets/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
 
 # The XML parser needs to now what object class names to look for and in which order to map them to integers.
 classes = ['background',
