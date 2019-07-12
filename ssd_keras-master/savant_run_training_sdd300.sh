@@ -32,4 +32,10 @@ export IMAGESET_TEST_2007=datasets/VOCdevkit/VOC2007/ImageSets/Main/test.txt
 
 export CUDA_VISIBLE_DEVICES=1,2,3
 
+export SAVE_IN_MEMORY=1
+export INITIAL_EPOCH=0
+export FINAL_EPOCH=40
+export STEPS_PER_EPOCH=500
+export BATCH_SIZE=32
+
 /home/gamir/edocohen/virtualenv/bone_cell_py36_env/bin/python ssd300_training.py

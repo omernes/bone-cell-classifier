@@ -24,6 +24,8 @@ from data_generator.object_detection_2d_photometric_ops import ConvertTo3Channel
 from data_generator.data_augmentation_chain_original_ssd import SSDDataAugmentation
 from data_generator.object_detection_2d_misc_utils import apply_inverse_transforms
 
+SAVE_IN_MEMORY = bool(int(getenv("SAVE_IN_MEMORY", "0")))
+
 ## 1. Set the model configuration parameters
 
 img_height = 300  # Height of the model input images
@@ -97,8 +99,8 @@ model.compile(optimizer=sgd, loss=ssd_loss.compute_loss)
 
 # Optional: If you have enough memory, consider loading the images into memory for the reasons explained above.
 
-train_dataset = DataGenerator(load_images_into_memory=False, hdf5_dataset_path=None)
-val_dataset = DataGenerator(load_images_into_memory=False, hdf5_dataset_path=None)
+train_dataset = DataGenerator(load_images_into_memory=SAVE_IN_MEMORY, hdf5_dataset_path=None)
+val_dataset = DataGenerator(load_images_into_memory=SAVE_IN_MEMORY, hdf5_dataset_path=None)
 
 # 2: Parse the image and label lists for the training and validation datasets. This can take a while.
 
@@ -182,7 +184,7 @@ val_dataset.parse_xml(images_dirs=[VOC_2007_TEST_images_dir],
 
 # 3: Set the batch size.
 
-batch_size = 32  # Change the batch size if you like, or if you run into GPU memory issues.
+batch_size = int(getenv("BATCH_SIZE", "32"))  # Change the batch size if you like, or if you run into GPU memory issues.
 
 # 4: Set the image transformations for pre-processing and data augmentation options.
 
