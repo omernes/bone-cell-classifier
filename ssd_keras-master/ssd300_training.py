@@ -271,7 +271,7 @@ model_checkpoint = ModelCheckpoint(
     save_best_only=True,
     save_weights_only=False,
     mode='auto',
-    period=1)
+    period=8)
 # model_checkpoint.best =
 
 csv_logger = CSVLogger(filename='ssd300_pascal_07+12_training_log.csv',
