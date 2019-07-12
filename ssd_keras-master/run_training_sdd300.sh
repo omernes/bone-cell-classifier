@@ -25,4 +25,4 @@ export IMAGESET_TEST_2007=~/VOCdevkit/VOC2007/ImageSets/Main/test.txt
 
 export CUDA_VISIBLE_DEVICES=1
 
-/home/gamir/edocohen/virtualenv/bone_cell_py36_env/bin/python ssd300_training.py
+/home/gamir/edocohen/anaconda3/envs/bone_cell_py37/bin/python ssd300_training.py
