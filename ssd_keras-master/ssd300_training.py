@@ -25,6 +25,7 @@ from data_generator.data_augmentation_chain_original_ssd import SSDDataAugmentat
 from data_generator.object_detection_2d_misc_utils import apply_inverse_transforms
 
 SAVE_IN_MEMORY = bool(int(getenv("SAVE_IN_MEMORY", "0")))
+MODEL_PATH = getenv("MODEL_PATH", "")
 
 ## 1. Set the model configuration parameters
 
@@ -59,39 +60,45 @@ normalize_coords = True
 ## 2. Build or load the model
 
 K.clear_session()  # Clear previous models from memory.
-
-model = ssd_300(image_size=(img_height, img_width, img_channels),
-                n_classes=n_classes,
-                mode='training',
-                l2_regularization=0.0005,
-                scales=scales,
-                aspect_ratios_per_layer=aspect_ratios,
-                two_boxes_for_ar1=two_boxes_for_ar1,
-                steps=steps,
-                offsets=offsets,
-                clip_boxes=clip_boxes,
-                variances=variances,
-                normalize_coords=normalize_coords,
-                subtract_mean=mean_color,
-                swap_channels=swap_channels)
-
-# 2: Load some weights into the model.
-
-# TODO: Set the path to the weights you want to load.
-weights_path = 'data/VGG_ILSVRC_16_layers_fc_reduced.h5'
-
-model.load_weights(weights_path, by_name=True)
-
-# 3: Instantiate an optimizer and the SSD loss function and compile the model.
-#    If you want to follow the original Caffe implementation, use the preset SGD
-#    optimizer, otherwise I'd recommend the commented-out Adam optimizer.
-
-# adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
-
 ssd_loss = SSDLoss(neg_pos_ratio=3, alpha=1.0)
 
-model.compile(optimizer=sgd, loss=ssd_loss.compute_loss)
+if MODEL_PATH != "":
+    model = load_model(MODEL_PATH, custom_objects={'AnchorBoxes': AnchorBoxes,
+                                                   'L2Normalization': L2Normalization,
+                                                   'compute_loss': ssd_loss.compute_loss})
+else:
+    model = ssd_300(image_size=(img_height, img_width, img_channels),
+                    n_classes=n_classes,
+                    mode='training',
+                    l2_regularization=0.0005,
+                    scales=scales,
+                    aspect_ratios_per_layer=aspect_ratios,
+                    two_boxes_for_ar1=two_boxes_for_ar1,
+                    steps=steps,
+                    offsets=offsets,
+                    clip_boxes=clip_boxes,
+                    variances=variances,
+                    normalize_coords=normalize_coords,
+                    subtract_mean=mean_color,
+                    swap_channels=swap_channels)
+
+    # 2: Load some weights into the model.
+
+    # TODO: Set the path to the weights you want to load.
+    weights_path = 'data/VGG_ILSVRC_16_layers_fc_reduced.h5'
+
+    model.load_weights(weights_path, by_name=True)
+
+    # 3: Instantiate an optimizer and the SSD loss function and compile the model.
+    #    If you want to follow the original Caffe implementation, use the preset SGD
+    #    optimizer, otherwise I'd recommend the commented-out Adam optimizer.
+
+    # adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
+
+
+
+    model.compile(optimizer=sgd, loss=ssd_loss.compute_loss)
 
 ## 3. Set up the data generators for the training
 
