@@ -9,3 +9,4 @@ sklearn
 pillow
 tqdm
 lxml
+pascal_voc_writer
