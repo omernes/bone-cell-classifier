@@ -38,7 +38,7 @@ mean_color = [123, 117,
               104]  # The per-channel mean of the images in the dataset. Do not change this value if you're using any of the pre-trained weights.
 swap_channels = [2, 1,
                  0]  # The color channel order in the original SSD is BGR, so we'll have the model reverse the color channel order of the input images.
-n_classes = getenv("NUM_CLASSES", 5)  # Number of positive classes, e.g. 20 for Pascal VOC, 80 for MS COCO
+n_classes = int(getenv("NUM_CLASSES", 5))  # Number of positive classes, e.g. 20 for Pascal VOC, 80 for MS COCO
 scales_pascal = [0.1, 0.2, 0.37, 0.54, 0.71, 0.88,
                  1.05]  # The anchor box scaling factors used in the original SSD300 for the Pascal VOC datasets
 scales_coco = [0.07, 0.15, 0.33, 0.51, 0.69, 0.87,
