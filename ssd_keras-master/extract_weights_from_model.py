@@ -15,8 +15,6 @@ model = load_model(MODEL_PATH, custom_objects={'AnchorBoxes': AnchorBoxes,
                                                    'L2Normalization': L2Normalization,
                                                    'compute_loss': ssd_loss.compute_loss})
 
-weights = model.get_weights()
+weights = model.save_weights(f"{MODEL_PATH[:-3]}_weights-only.h5")
 
-with open(f"{MODEL_PATH[:-3]}_weights-only.h5", "w") as weights_file:
-    weights_file.write(weights)
 
