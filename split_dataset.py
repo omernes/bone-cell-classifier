@@ -20,15 +20,18 @@ final = filenames
 
 print(final[:5])
 print(len(final))
-idx = int(0.8 * len(final))
+idx1 = int(0.7 * len(final))
+idx2 = int(0.85 * len(final))
 
 random.shuffle(final)
 
-train_files = final[:idx]
-test_files = final[idx:]
+train_files = final[:idx1]
+val_files = final[idx1:idx2]
+test_files = final[idx2:]
 
-print(len(train_files))
-print(len(test_files))
+print(f"Train samples: {len(train_files)}")
+print(f"Validation samples: {len(val_files)}")
+print(f"Test samples: {len(test_files)}")
 
 # lines = []
 # for file in train_files:
@@ -36,6 +39,9 @@ print(len(test_files))
 
 with open(path.join(TARGET_DIR, "train.txt"), "w") as f:
   f.write("\n".join(train_files) + "\n")
+
+with open(path.join(TARGET_DIR, "val.txt"), "w") as f:
+  f.write("\n".join(val_files) + "\n")
 
 # lines = []
 # for file in test_files:
