@@ -1,3 +1,5 @@
+from keras.optimizers import SGD
+from keras import backend as K
 from matplotlib import pyplot as plt
 import numpy as np
 from keras.engine.saving import load_model
@@ -10,18 +12,44 @@ from data_generator.object_detection_2d_photometric_ops import ConvertTo3Channel
 from keras_layers.keras_layer_AnchorBoxes import AnchorBoxes
 from keras_layers.keras_layer_L2Normalization import L2Normalization
 from keras_loss_function.keras_ssd_loss import SSDLoss
+from models.keras_ssd300 import ssd_300
 from ssd_encoder_decoder.ssd_output_decoder import decode_detections
 
 
-images_dir = getenv("IMAGES_DIR")
-annotations_dir = getenv("ANNOTATIONS_DIR")
-image_set_filename = getenv("DATASET_FILENAME")
-# images_dir = "data"
-# annotations_dir = "data"
-# image_set_filename = "data/files.txt"
+# images_dir = getenv("IMAGES_DIR")
+# annotations_dir = getenv("ANNOTATIONS_DIR")
+# image_set_filename = getenv("DATASET_FILENAME")
+images_dir = "data"
+annotations_dir = "data"
+image_set_filename = "data/files.txt"
 
 img_height = 300  # Height of the model input images
 img_width = 300  # Width of the model input images
+img_channels = 3  # Number of color channels of the model input images
+mean_color = [123, 117,
+              104]  # The per-channel mean of the images in the dataset. Do not change this value if you're using any of the pre-trained weights.
+swap_channels = [2, 1,
+                 0]  # The color channel order in the original SSD is BGR, so we'll have the model reverse the color channel order of the input images.
+n_classes = 20  # Number of positive classes, e.g. 20 for Pascal VOC, 80 for MS COCO
+scales_pascal = [0.1, 0.2, 0.37, 0.54, 0.71, 0.88,
+                 1.05]  # The anchor box scaling factors used in the original SSD300 for the Pascal VOC datasets
+scales_coco = [0.07, 0.15, 0.33, 0.51, 0.69, 0.87,
+               1.05]  # The anchor box scaling factors used in the original SSD300 for the MS COCO datasets
+scales = scales_pascal
+aspect_ratios = [[1.0, 2.0, 0.5],
+                 [1.0, 2.0, 0.5, 3.0, 1.0 / 3.0],
+                 [1.0, 2.0, 0.5, 3.0, 1.0 / 3.0],
+                 [1.0, 2.0, 0.5, 3.0, 1.0 / 3.0],
+                 [1.0, 2.0, 0.5],
+                 [1.0, 2.0, 0.5]]  # The anchor box aspect ratios used in the original SSD300; the order matters
+two_boxes_for_ar1 = True
+steps = [8, 16, 32, 64, 100, 300]  # The space between two adjacent anchor box center points for each predictor layer.
+offsets = [0.5, 0.5, 0.5, 0.5, 0.5,
+           0.5]  # The offsets of the first anchor box center points from the top and left borders of the image as a fraction of the step size for each predictor layer.
+clip_boxes = False  # Whether or not to clip the anchor boxes to lie entirely within the image boundaries
+variances = [0.1, 0.1, 0.2,
+             0.2]  # The variances by which the encoded target coordinates are divided as in the original implementation
+normalize_coords = True
 
 classes = ['background',
            'aeroplane', 'bicycle', 'bird', 'boat',
@@ -29,8 +57,6 @@ classes = ['background',
            'chair', 'cow', 'diningtable', 'dog',
            'horse', 'motorbike', 'person', 'pottedplant',
            'sheep', 'sofa', 'train', 'tvmonitor']
-
-n_classes = len(classes)
 
 # For the validation generator:
 ssd_loss = SSDLoss(neg_pos_ratio=3, alpha=1.0)
@@ -52,7 +78,7 @@ val_dataset.parse_xml(images_dirs=[images_dir],
                       ret=False)
 
 predict_generator = val_dataset.generate(batch_size=1,
-                                         shuffle=False,
+                                         shuffle=True,
                                          transformations=[convert_to_3_channels,
                                                           resize],
                                          label_encoder=None,
@@ -79,12 +105,36 @@ print(np.array(batch_original_labels[i]))
 
 
 # 3: Make predictions.
-MODEL_PATH = getenv("MODEL_PATH")
-# MODEL_PATH = "ssd300_pascal_07+12_epoch-80_loss-4.4898_val_loss-5.6198.h5"
+# MODEL_WEIGHTS_PATH = getenv("MODEL_WEIGHTS_PATH")
+MODEL_WEIGHTS_PATH = "ssd300_pascal_07+12_epoch-80_loss-4.4898_val_loss-5.6198_weights-only.h5"
 
-model = load_model(MODEL_PATH, custom_objects={'AnchorBoxes': AnchorBoxes,
-                                                   'L2Normalization': L2Normalization,
-                                                   'compute_loss': ssd_loss.compute_loss})
+K.clear_session()
+model = ssd_300(image_size=(img_height, img_width, img_channels),
+                n_classes=n_classes,
+                mode='training',
+                l2_regularization=0.0005,
+                scales=scales,
+                aspect_ratios_per_layer=aspect_ratios,
+                two_boxes_for_ar1=two_boxes_for_ar1,
+                steps=steps,
+                offsets=offsets,
+                clip_boxes=clip_boxes,
+                variances=variances,
+                normalize_coords=normalize_coords,
+                subtract_mean=mean_color,
+                swap_channels=swap_channels)
+
+# 2: Load some weights into the model.
+model.load_weights(MODEL_WEIGHTS_PATH, by_name=True)
+
+# 3: Instantiate an optimizer and the SSD loss function and compile the model.
+#    If you want to follow the original Caffe implementation, use the preset SGD
+#    optimizer, otherwise I'd recommend the commented-out Adam optimizer.
+
+# adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
+
+model.compile(optimizer=sgd, loss=ssd_loss.compute_loss)
 
 y_pred = model.predict(batch_images)
 
@@ -136,3 +186,5 @@ for box in y_pred_decoded_inv[i]:
     label = '{}: {:.2f}'.format(classes[int(box[0])], box[1])
     current_axis.add_patch(plt.Rectangle((xmin, ymin), xmax-xmin, ymax-ymin, color=color, fill=False, linewidth=2))
     current_axis.text(xmin, ymin, label, size='x-large', color='white', bbox={'facecolor':color, 'alpha':1.0})
+
+print("hi")

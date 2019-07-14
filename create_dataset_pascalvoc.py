@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.path as mplpath
+from keras.preprocessing.image import array_to_img
 # from skimage.transform import rotate
 from os import getenv
 from PIL import Image
@@ -180,9 +181,10 @@ def create_dataset(window_size, step_size):
             cord = cords[idx]
             if not create_xml(json_content, name, cord[0], cord[1], cord[2], cord[3], idx):
                 continue
-            new_filename = f"{name}_{idx}.npy"
+            new_filename = f"{name}_{idx}.jpg"
             path_to_save = os.path.join(TARGET_IMAGES_DIR, new_filename)
-            np.save(path_to_save, window_mat)
+            img = array_to_img(window_mat)
+            np.save(path_to_save, img)
 
         print(f"Finished {name}")
 
