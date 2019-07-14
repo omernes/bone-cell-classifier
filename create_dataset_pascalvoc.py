@@ -184,7 +184,8 @@ def create_dataset(window_size, step_size):
             new_filename = f"{name}_{idx}.jpg"
             path_to_save = os.path.join(TARGET_IMAGES_DIR, new_filename)
             img = array_to_img(window_mat)
-            np.save(path_to_save, img)
+            img.save(path_to_save, format="JPEG")
+            # np.save(path_to_save, img)
 
         print(f"Finished {name}")
 
