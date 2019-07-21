@@ -49,12 +49,16 @@ VOC_2007_test_image_set_filename = getenv('IMAGESET_TEST_2007', 'datasets/VOCdev
 # Pascal_VOC_dataset_image_set_filename = '../../datasets/VOCdevkit/VOC2007/ImageSets/Main/test.txt'
 
 # The XML parser needs to now what object class names to look for and in which order to map them to integers.
+# classes = ['background',
+#            'aeroplane', 'bicycle', 'bird', 'boat',
+#            'bottle', 'bus', 'car', 'cat',
+#            'chair', 'cow', 'diningtable', 'dog',
+#            'horse', 'motorbike', 'person', 'pottedplant',
+#            'sheep', 'sofa', 'train', 'tvmonitor']
+
 classes = ['background',
-           'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat',
-           'chair', 'cow', 'diningtable', 'dog',
-           'horse', 'motorbike', 'person', 'pottedplant',
-           'sheep', 'sofa', 'train', 'tvmonitor']
+           '0_1', '0_2', '0_3', 'g',
+           'p']
 
 dataset.parse_xml(images_dirs=[VOC_2007_TEST_images_dir],
                   image_set_filenames=[VOC_2007_test_image_set_filename],
