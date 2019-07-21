@@ -85,6 +85,7 @@ class Resize:
                 return image
         else:
             labels = np.copy(labels)
+            print("labels :: ", labels)
             labels[:, [ymin, ymax]] = np.round(labels[:, [ymin, ymax]] * (self.out_height / img_height), decimals=0)
             labels[:, [xmin, xmax]] = np.round(labels[:, [xmin, xmax]] * (self.out_width / img_width), decimals=0)
 

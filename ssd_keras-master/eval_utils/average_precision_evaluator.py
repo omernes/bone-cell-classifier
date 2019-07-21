@@ -398,7 +398,7 @@ class Evaluator:
                     y_pred_filtered.append(y_pred[i][y_pred[i,:,0] != 0])
                 y_pred = y_pred_filtered
 
-            print("y_pred :: ", y_pred)
+            # print("y_pred :: ", y_pred)
 
             # Convert the predicted box coordinates for the original images.
             y_pred = apply_inverse_transforms(y_pred, batch_inverse_transforms)
