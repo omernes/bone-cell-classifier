@@ -1048,8 +1048,8 @@ class DataGenerator:
             batch_inverse_transforms = []
 
             for i in range(len(batch_X)):
-                if len(batch_y[i]) == 0:
-                    continue
+                # if len(batch_y[i]) == 0:
+                #     continue
 
                 if not (self.labels is None):
                     # Convert the labels for this image to an array (in case they aren't already).
