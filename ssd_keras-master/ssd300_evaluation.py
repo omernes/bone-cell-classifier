@@ -74,22 +74,24 @@ evaluator = Evaluator(model=model,
                       n_classes=n_classes,
                       data_generator=dataset,
                       model_mode=model_mode)
-
-results = evaluator(img_height=img_height,
-                    img_width=img_width,
-                    batch_size=8,
-                    data_generator_mode='resize',
-                    round_confidences=False,
-                    matching_iou_threshold=0.5,
-                    border_pixels='include',
-                    sorting_algorithm='quicksort',
-                    average_precision_mode='sample',
-                    num_recall_points=11,
-                    ignore_neutral_boxes=True,
-                    return_precisions=True,
-                    return_recalls=True,
-                    return_average_precisions=True,
-                    verbose=True)
+try:
+    results = evaluator(img_height=img_height,
+                        img_width=img_width,
+                        batch_size=8,
+                        data_generator_mode='resize',
+                        round_confidences=False,
+                        matching_iou_threshold=0.5,
+                        border_pixels='include',
+                        sorting_algorithm='quicksort',
+                        average_precision_mode='sample',
+                        num_recall_points=11,
+                        ignore_neutral_boxes=True,
+                        return_precisions=True,
+                        return_recalls=True,
+                        return_average_precisions=True,
+                        verbose=True)
+except:
+    print("FAIL")
 
 results_by_image = evaluator.prediction_results_by_image
 
