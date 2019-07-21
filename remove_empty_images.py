@@ -27,7 +27,7 @@ for root, dirs, files in walk(ANNOTATIONS_DIR):
         for boxes in root.iter('object'):
             print(boxes)
             has_objects = True
-            break
+            # break
 
         if not has_objects:
             files_to_remove.append(file[:-4])
