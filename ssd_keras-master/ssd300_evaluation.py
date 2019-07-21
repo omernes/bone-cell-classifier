@@ -94,10 +94,12 @@ except:
     print("FAIL")
 
 results_by_image = evaluator.prediction_results_by_image
+print("RESULTSSSSSS")
+print(results_by_image)
 
-with open(RESULTS_PATH, "w") as f:
-    import json
-    f.write(json.dumps(results_by_image))
+# with open(RESULTS_PATH, "w") as f:
+#     import json
+#     f.write(json.dumps(results_by_image))
 
 mean_average_precision, average_precisions, precisions, recalls = results
 
