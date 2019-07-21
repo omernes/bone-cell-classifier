@@ -1092,8 +1092,8 @@ class DataGenerator:
                 # Check for degenerate boxes in this batch item.
                 #########################################################################################
 
-                print(batch_y)
-                print(batch_y.shape)
+                print("batch_y :: ", batch_y)
+                # print(batch_y)
                 if not (self.labels is None):
 
                     xmin = self.labels_format['xmin']
