@@ -2,7 +2,7 @@ from os import getenv, walk
 import xml.etree.ElementTree as ET
 
 IMAGES_DIR = getenv("IMAGES_DIR", "/a/home/cc/students/csguests/omernestor/data_xml/images")
-ANNOTATIONS_DIR = getenv("ANNOTATIONS_DIR", "/a/home/cc/students/csguests/omernestor/data_xml/annotaions")
+ANNOTATIONS_DIR = getenv("ANNOTATIONS_DIR", "/a/home/cc/students/csguests/omernestor/data_xml/annotations")
 
 IMAGESET_TEST = getenv("IMAGESET_TEST", "/a/home/cc/students/csguests/omernestor/data_xml/test.txt")
 
