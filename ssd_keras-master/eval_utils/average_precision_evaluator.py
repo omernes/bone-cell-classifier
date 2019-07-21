@@ -81,6 +81,7 @@ class Evaluator:
         # The following lists all contain per-class data, i.e. all list have the length `n_classes + 1`,
         # where one element is for the background class, i.e. that element is just a dummy entry.
         self.prediction_results = None
+        self.prediction_results_by_image = None
         self.num_gt_per_class = None
         self.true_positives = None
         self.false_positives = None
@@ -354,6 +355,7 @@ class Evaluator:
 
         # We have to generate a separate results list for each class.
         results = [list() for _ in range(self.n_classes + 1)]
+        results_by_image = dict()
 
         # Create a dictionary that maps image IDs to ground truth annotations.
         # We'll need it below.
@@ -415,10 +417,17 @@ class Evaluator:
                     xmax = round(box[xmax_pred], 1)
                     ymax = round(box[ymax_pred], 1)
                     prediction = (image_id, confidence, xmin, ymin, xmax, ymax)
+
                     # Append the predicted box to the results list for its class.
                     results[class_id].append(prediction)
 
+                    prediction_v2 = (class_id, confidence, xmin, ymin, xmax, ymax)
+                    if image_id not in results_by_image:
+                        results_by_image[image_id] = []
+                    results_by_image[image_id].append(prediction_v2)
+
         self.prediction_results = results
+        self.prediction_results_by_image = results_by_image
 
         if ret:
             return results

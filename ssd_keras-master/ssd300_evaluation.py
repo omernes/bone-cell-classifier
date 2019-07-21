@@ -21,6 +21,7 @@ img_width = 300
 n_classes = int(getenv("NUM_CLASSES", "20"))
 model_mode = 'inference'
 
+RESULTS_PATH = getenv("RESULTS_PATH", "results_boxes.json")
 
 # TODO: Set the path to the `.h5` file of the model to be loaded.
 model_path = getenv("MODEL_PATH")
@@ -85,6 +86,12 @@ results = evaluator(img_height=img_height,
                     return_recalls=True,
                     return_average_precisions=True,
                     verbose=True)
+
+results_by_image = evaluator.prediction_results_by_image
+
+with open(RESULTS_PATH, "w") as f:
+    import json
+    f.write(json.dumps(results_by_image))
 
 mean_average_precision, average_precisions, precisions, recalls = results
 
