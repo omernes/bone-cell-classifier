@@ -14,7 +14,7 @@ new_test_files = []
 for test_file in test_files:
     print(test_file)
 
-    tree = ET.parse(path.join(ANNOTATIONS_DIR, test_file + ".xml"))
+    tree = ET.parse(path.join(ANNOTATIONS_DIR, test_file[:-1] + ".xml"))
     root = tree.getroot()
     list_with_all_boxes = []
 
