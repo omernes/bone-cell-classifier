@@ -1092,7 +1092,7 @@ class DataGenerator:
                 # Check for degenerate boxes in this batch item.
                 #########################################################################################
 
-                print("batch_y :: ", batch_y)
+                print(f"batch_y[{i}] :: ", batch_y[i])
                 # print(batch_y)
                 if not (self.labels is None):
 
