@@ -13,10 +13,10 @@ for root, dirs, files in walk(ANNOTATIONS_DIR):
         if root != ANNOTATIONS_DIR:
             continue
 
-        with open(path.join(ANNOTATIONS_DIR, file), "r") as f:
-            content = f.read()
+        # with open(path.join(ANNOTATIONS_DIR, file), "r") as f:
+        #     content = f.read()
 
-        tree = ET.parse(content)
+        tree = ET.parse(path.join(ANNOTATIONS_DIR, file))
         root = tree.getroot()
 
         list_with_all_boxes = []
