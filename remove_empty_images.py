@@ -10,7 +10,7 @@ files_to_remove = []
 
 for root, dirs, files in walk(ANNOTATIONS_DIR):
     for file in files:
-        if root != IMAGES_DIR:
+        if root != ANNOTATIONS_DIR:
             continue
 
         with open(file, "r") as f:
