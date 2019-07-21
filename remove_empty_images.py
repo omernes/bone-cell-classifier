@@ -1,4 +1,4 @@
-from os import getenv, walk
+from os import getenv, walk, path
 import xml.etree.ElementTree as ET
 
 IMAGES_DIR = getenv("IMAGES_DIR", "/a/home/cc/students/csguests/omernestor/data_xml/images")
@@ -13,7 +13,7 @@ for root, dirs, files in walk(ANNOTATIONS_DIR):
         if root != ANNOTATIONS_DIR:
             continue
 
-        with open(file, "r") as f:
+        with open(path.join(ANNOTATIONS_DIR, file), "r") as f:
             content = f.read()
 
         tree = ET.parse(content)
