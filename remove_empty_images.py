@@ -21,8 +21,11 @@ for root, dirs, files in walk(ANNOTATIONS_DIR):
 
         list_with_all_boxes = []
 
+        print(file)
+
         has_objects = False
         for boxes in root.iter('object'):
+            print(boxes)
             has_objects = True
             break
 
