@@ -1048,6 +1048,8 @@ class DataGenerator:
             batch_inverse_transforms = []
 
             for i in range(len(batch_X)):
+                if len(batch_y[i]) == 0:
+                    continue
 
                 if not (self.labels is None):
                     # Convert the labels for this image to an array (in case they aren't already).
@@ -1092,8 +1094,8 @@ class DataGenerator:
                 # Check for degenerate boxes in this batch item.
                 #########################################################################################
 
-                print(f"batch_y[{i}] :: ", batch_y[i])
-                # print(batch_y)
+                # print(f"batch_y[{i}] :: ", batch_y[i])
+
                 if not (self.labels is None):
 
                     xmin = self.labels_format['xmin']

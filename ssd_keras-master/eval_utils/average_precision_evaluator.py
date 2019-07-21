@@ -320,8 +320,8 @@ class Evaluator:
         convert_to_3_channels = ConvertTo3Channels()
         resize = Resize(height=img_height,width=img_width, labels_format=self.gt_format)
         if data_generator_mode == 'resize':
-            transformations = [convert_to_3_channels,]
-                               # resize]
+            transformations = [convert_to_3_channels,
+                               resize]
         elif data_generator_mode == 'pad':
             random_pad = RandomPadFixedAR(patch_aspect_ratio=img_width/img_height, labels_format=self.gt_format)
             transformations = [convert_to_3_channels,
