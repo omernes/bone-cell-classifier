@@ -43,6 +43,6 @@ for filename in test_files:
         new_test_files.append(filename)
 
 with open(IMAGESET_TEST[:-4] + "_new.txt", "w") as f:
-    f.write("\n".join(new_test_files))
+    f.write("".join(new_test_files))
 
-print("\n".join(new_test_files))
+print("".join(new_test_files))
