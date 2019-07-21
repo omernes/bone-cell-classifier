@@ -39,7 +39,7 @@ for filename in test_files:
     if filename not in files_to_remove:
         new_test_files.append(filename)
 
-with open("new_" + IMAGESET_TEST, "w") as f:
+with open(IMAGESET_TEST[:-4] + "_new.txt", "w") as f:
     f.write("\n".join(new_test_files))
 
 print("\n".join(new_test_files))
