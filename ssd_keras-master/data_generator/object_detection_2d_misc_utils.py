@@ -50,11 +50,11 @@ def apply_inverse_transforms(y_pred_decoded, inverse_transforms):
 
         y_pred_decoded_inv = []
 
-        print(inverse_transforms)
+        # print(inverse_transforms)
         for i in range(len(y_pred_decoded)):
             y_pred_decoded_inv.append(np.copy(y_pred_decoded[i]))
             if y_pred_decoded_inv[i].size > 0: # If there are any predictions for this batch item.
-                print(i)
+                # print(i)
                 for inverter in inverse_transforms[i]:
                     if not (inverter is None):
                         y_pred_decoded_inv[i] = inverter(y_pred_decoded_inv[i])

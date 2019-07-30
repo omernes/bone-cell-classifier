@@ -30,7 +30,7 @@ mean_color = [123, 117,
               104]  # The per-channel mean of the images in the dataset. Do not change this value if you're using any of the pre-trained weights.
 swap_channels = [2, 1,
                  0]  # The color channel order in the original SSD is BGR, so we'll have the model reverse the color channel order of the input images.
-n_classes = 20  # Number of positive classes, e.g. 20 for Pascal VOC, 80 for MS COCO
+n_classes = 5  # Number of positive classes, e.g. 20 for Pascal VOC, 80 for MS COCO
 scales_pascal = [0.1, 0.2, 0.37, 0.54, 0.71, 0.88,
                  1.05]  # The anchor box scaling factors used in the original SSD300 for the Pascal VOC datasets
 scales_coco = [0.07, 0.15, 0.33, 0.51, 0.69, 0.87,
@@ -51,12 +51,16 @@ variances = [0.1, 0.1, 0.2,
              0.2]  # The variances by which the encoded target coordinates are divided as in the original implementation
 normalize_coords = True
 
+# classes = ['background',
+#            'aeroplane', 'bicycle', 'bird', 'boat',
+#            'bottle', 'bus', 'car', 'cat',
+#            'chair', 'cow', 'diningtable', 'dog',
+#            'horse', 'motorbike', 'person', 'pottedplant',
+#            'sheep', 'sofa', 'train', 'tvmonitor']
+
 classes = ['background',
-           'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat',
-           'chair', 'cow', 'diningtable', 'dog',
-           'horse', 'motorbike', 'person', 'pottedplant',
-           'sheep', 'sofa', 'train', 'tvmonitor']
+           '0_1', '0_2', '0_3', 'g',
+           'p']
 
 # For the validation generator:
 ssd_loss = SSDLoss(neg_pos_ratio=3, alpha=1.0)
@@ -106,7 +110,7 @@ print(np.array(batch_original_labels[i]))
 
 # 3: Make predictions.
 # MODEL_WEIGHTS_PATH = getenv("MODEL_WEIGHTS_PATH")
-MODEL_WEIGHTS_PATH = "ssd300_pascal_07+12_epoch-80_loss-4.4898_val_loss-5.6198_weights-only.h5"
+MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-90_loss-9.4139_val_loss-27.5296_weights-only.h5"
 
 K.clear_session()
 model = ssd_300(image_size=(img_height, img_width, img_channels),

@@ -94,8 +94,8 @@ except:
     print("FAIL")
 
 results_by_image = evaluator.prediction_results_by_image
-print("RESULTSSSSSS")
-print(results_by_image)
+# print("RESULTSSSSSS")
+# print(results_by_image)
 
 # with open(RESULTS_PATH, "w") as f:
 #     import json
