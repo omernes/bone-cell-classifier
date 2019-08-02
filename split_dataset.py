@@ -13,7 +13,7 @@ for root, dirs, files in walk(IMAGES_DIR):
 
 final = []
 for filename in filenames:
-  if path.exists(path.join(ANNOTATIONS_DIR, f"{filename[:-3]}.xml")):
+  if path.exists(path.join(ANNOTATIONS_DIR, f"{filename}.xml")):
     final.append(filename)
 
 # final = filenames
