@@ -11,12 +11,12 @@ for root, dirs, files in walk(IMAGES_DIR):
   for file in files:
     filenames.append(file[:-4])
 
-# final = []
-# for filename in filenames:
-#   if path.exists(path.join(ANNOTATIONS_DIR, f"{filename[:-3]}.xml")):
-#     final.append(filename)
+final = []
+for filename in filenames:
+  if path.exists(path.join(ANNOTATIONS_DIR, f"{filename[:-3]}.xml")):
+    final.append(filename)
 
-final = filenames
+# final = filenames
 
 print(final[:5])
 print(len(final))

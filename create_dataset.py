@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 # from keras.preprocessing.image import array_to_img
 import numpy as np
 import json
+from pascal_voc_writer import Writer
 
 classes = ['background', '0_1', '0_2', '0_3', 'g', 'p']
 n_classes = 5
@@ -198,17 +199,29 @@ def create_sliding_windows(img, polygons, size=(300, 300), step=300):
 
     return windows
 
-def create_xml(polygons):
-    return json.dumps(polygons)
+def create_xml(polygons, width, height, path_to_save):
+    writer = Writer('', width, height)
+
+    for polygon in polygons:
+        writer.addObject(polygon[0], int(polygon[2]), int(polygon[3]), int(polygon[4]), int(polygon[5]))
+
+    writer.save(path_to_save)
+    # return json.dumps(polygons)
 
 def create_dataset(data_path, target_image_path, target_annotation_path):
     dataset = load_dataset(data_path)
     for img_id, record in dataset.items():
+        print(f"Starting :: {img_id}")
         # display_image(record["image"], record["polygons"])
         # win_img, win_poly = cut_window_from_image(record["image"], record["polygons"], xy=(0, 310), window_size=(300, 300))
         # display_image(win_img, win_poly)
-        windows = create_sliding_windows(record["image"], record["polygons"])
+        windows = create_sliding_windows(record["image"], record["polygons"], size=(300,300), step=100)
+        print(f"-- created {len(windows)} windows...")
         for idx, window in windows.items():
+            if len(window[1]) == 0:
+                print(f"-- window {idx} has no polygons... skipping")
+                continue
+
             filename = f"{img_id}_{idx}"
             # display_image(window[0], window[1])
 
@@ -219,26 +232,26 @@ def create_dataset(data_path, target_image_path, target_annotation_path):
             # img = array_to_img(window[0])
             # img.save(os.path.join(target_image_path, f"{filename}.jpg"), format="JPEG")
 
-            xml = create_xml(window[1])
-            with open(os.path.join(target_annotation_path, f"{filename}.txt"), "w") as f:
-                f.write(xml)
-        break
+            create_xml(window[1], 300, 300, os.path.join(TARGET_ANNOTAIONS, f"{filename}.xml"))
+        print("-- done")
 
 
-DATASET_PATH = "data"
-TARGET_IMAGES = os.path.join("data_xml", "images")
-TARGET_ANNOTAIONS = os.path.join("data_xml", "annotations")
+if __name__ == "__main__":
+    DATASET_PATH = "data"
+    TARGET_IMAGES = os.path.join("data_xml", "images")
+    TARGET_ANNOTAIONS = os.path.join("data_xml", "annotations")
 
-create_dataset(DATASET_PATH, TARGET_IMAGES, TARGET_ANNOTAIONS)
+    create_dataset(DATASET_PATH, TARGET_IMAGES, TARGET_ANNOTAIONS)
 
 
-# dataset = load_dataset(DATASET_PATH)
-# img = dataset["B2_03_03"]["image"]
-#
-# poly = [Polygon(label="0_1", points=[[100, 100], [200, 100], [200, 150], [100, 150]])]
-#
-# # display_image(img, poly)
-#
-# img2, poly2 = cut_window_from_image(img, poly, xy=(50, 0))
-#
-# display_image(img2, poly2)
+    # dataset = load_dataset(DATASET_PATH)
+    # img = dataset["B2_03_03"]["image"]
+    #
+    # poly = [Polygon(label="0_1", points=[[100, 100], [200, 100], [200, 150], [100, 150]])]
+    #
+    # # display_image(img, poly)
+    #
+    # img2, poly2 = cut_window_from_image(img, poly, xy=(50, 0))
+    #
+    # display_image(img2, poly2)
+    # display_image(img2, poly2)
