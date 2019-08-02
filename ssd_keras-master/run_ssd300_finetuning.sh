@@ -9,7 +9,7 @@ export TEST_IMAGESET_FILENAME=/a/home/cc/students/csguests/omernestor/data_xml/t
 
 export WEIGHTS_PATH=data/VGG_VOC0712_SSD_300x300_iter_120000_subsampled_6_classes.h5
 export SAVE_IN_MEMORY=1
-export MODEL_PATH=""
+export MODEL_PATH="ssd300_bone-cell-dataset_epoch-15_loss-3.5147_val_loss-3.0477.h5"
 export NUM_CLASSES=5
 export BATCH_SIZE=32
 
