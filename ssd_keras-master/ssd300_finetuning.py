@@ -1,4 +1,4 @@
-from os import getenv
+from os import getenv, path
 
 from keras.optimizers import Adam, SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TerminateOnNaN, CSVLogger
@@ -276,8 +276,10 @@ def lr_schedule(epoch):
 # Define model callbacks.
 
 # TODO: Set the filepath under which you want to save the model.
+MODEL_CHECKPOINT_PATH = getenv("MODEL_CHECKPOINT_PATH", ".")
+
 model_checkpoint = ModelCheckpoint(
-    filepath='ssd300_bone-cell-dataset_epoch-{epoch:02d}_loss-{loss:.4f}_val_loss-{val_loss:.4f}.h5',
+    filepath=path.join(MODEL_CHECKPOINT_PATH, 'ssd300_bone-cell-dataset_epoch-{epoch:02d}_loss-{loss:.4f}_val_loss-{val_loss:.4f}.h5'),
     monitor='val_loss',
     verbose=1,
     save_best_only=True,

@@ -17,7 +17,8 @@ export INITIAL_EPOCH=0
 export FINAL_EPOCH=40
 export CHECKPOINT_PERIOD=10
 export STEPS_PER_EPOCH=500
+export MODEL_CHECKPOINT_PATH=/vol/scratch/bone_cell
 
-export CUDA_VISIBLE_DEVICES=1,2,3,4,5
+export CUDA_VISIBLE_DEVICES=4,5,6,7
 
 /home/gamir/edocohen/anaconda3/envs/bone_cell_py37/bin/python ssd300_finetuning.py
