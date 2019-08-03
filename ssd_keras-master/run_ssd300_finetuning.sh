@@ -9,13 +9,13 @@ export TEST_IMAGESET_FILENAME=/a/home/cc/students/csguests/omernestor/data_xml/t
 
 export WEIGHTS_PATH=data/VGG_VOC0712_SSD_300x300_iter_120000_subsampled_6_classes.h5
 export SAVE_IN_MEMORY=1
-export MODEL_PATH="ssd300_bone-cell-dataset_epoch-15_loss-3.5147_val_loss-3.0477.h5"
+export MODEL_PATH="/vol/scratch/bone_cell/ssd300_bone-cell-dataset_epoch-20_loss-3.2703_val_loss-2.7799.h5"
 export NUM_CLASSES=5
 export BATCH_SIZE=32
 
-export INITIAL_EPOCH=15
+export INITIAL_EPOCH=20
 export FINAL_EPOCH=100
-export CHECKPOINT_PERIOD=5
+export CHECKPOINT_PERIOD=1
 export STEPS_PER_EPOCH=1000
 export MODEL_CHECKPOINT_PATH=/vol/scratch/bone_cell
 
