@@ -1,9 +1,9 @@
 from os import getenv, walk, path
 import random
 
-IMAGES_DIR = getenv("IMAGES_DIR")
-ANNOTATIONS_DIR = getenv("ANNOTATIONS_DIR")
-TARGET_DIR = getenv("TARGET_DIR")
+IMAGES_DIR = getenv("IMAGES_DIR", "data_xml/images")
+ANNOTATIONS_DIR = getenv("ANNOTATIONS_DIR", "data_xml/annotations")
+TARGET_DIR = getenv("TARGET_DIR", "data_xml")
 
 filenames = []
 

@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import json
 from pascal_voc_writer import Writer
+from skimage.transform import rotate
 
 classes = ['background', '0_1', '0_2', '0_3', 'g', 'p']
 n_classes = 5
@@ -67,16 +68,30 @@ def display_image(img, polygons=None):
 
     current_axis = plt.gca()
 
-    if polygons:
+    if len(polygons) > 0:
         for polygon in polygons:
             if isinstance(polygon, Polygon):
                 color = colors[classes.index(polygon.label)]
                 current_axis.add_patch(
                     plt.Polygon(xy=polygon.get_points(), closed=True, color=color, fill=False, linewidth=2))
             else:
-                print(polygon)
-                lbl, score, xmin, ymin, xmax, ymax = polygon
-                color = colors[classes.index(polygon[0])]
+                # print(polygon)
+                if len(polygon) == 6:
+                    lbl, score, xmin, ymin, xmax, ymax = polygon
+                else:
+                    lbl, xmin, ymin, xmax, ymax = polygon
+
+                if type(lbl) == int :
+                    lbl = classes[lbl]
+                    color = colors[classes.index(lbl)]
+                elif type(lbl) == str:
+                    color = colors[classes.index(lbl)]
+                elif np.issubdtype(lbl, float) or np.issubdtype(lbl, int):
+                    lbl = classes[int(lbl)]
+                    color = colors[classes.index(lbl)]
+                else:
+                    color = colors[classes.index(lbl)]
+
                 current_axis.add_patch(
                     plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, color=color, fill=False, linewidth=2))
                 current_axis.text(xmin, ymin, lbl, size='x-large', color='white',
@@ -208,6 +223,76 @@ def create_xml(polygons, width, height, path_to_save):
     writer.save(path_to_save)
     # return json.dumps(polygons)
 
+# def augment_image(img):
+#     #     print("flipping...")
+#     horizontal_flip = img[:, ::-1]
+#     vertical_flip = img[::-1, :]
+#     #     print("rotating...")
+#     rotation_90 = rotate(img, 90)
+#     rotation_180 = rotate(img, 180)
+#     rotation_270 = rotate(img, 270)
+#     new_images_set = [horizontal_flip, vertical_flip, rotation_270, rotation_180,
+#                       rotation_90]
+#     aug_imgs = {
+#         "orig": img,
+#         "rot_90": rotation_90,
+#         "rot_180": rotation_180,
+#         "rot_270": rotation_270,
+#         "flip_hor": horizontal_flip,
+#         "flip_ver": vertical_flip
+#     }
+#     return aug_imgs
+
+# polygons = list of lists
+# img = ndarray
+def create_augmentations(img, polygons, include_orig=True):
+    augmentations = {}
+    if include_orig:
+        augmentations["orig"] = (img, polygons)
+
+    horizontal_flip = img[:, ::-1]
+    hor_new_polygons = []
+    for polygon in polygons:
+        lbl, score, xmin, ymin, xmax, ymax = polygon
+        new_xmin = 300 - xmax
+        new_xmax = 300 - xmin
+        new_polygon = [lbl, score, new_xmin, ymin, new_xmax, ymax]
+        hor_new_polygons.append(new_polygon)
+    augmentations["hor"] = (horizontal_flip, hor_new_polygons)
+
+    vertical_flip = img[::-1, :]
+    ver_new_polygons = []
+    for polygon in polygons:
+        lbl, score, xmin, ymin, xmax, ymax = polygon
+        new_ymin = 300 - ymax
+        new_ymax = 300 - ymin
+        new_polygon = [lbl, score, xmin, new_ymin, xmax, new_ymax]
+        ver_new_polygons.append(new_polygon)
+    augmentations["ver"] = (vertical_flip, ver_new_polygons)
+
+    new_roots = {
+        90: (0, 300),
+        180: (300, 300),
+        270: (300, 0)
+    }
+
+    rotations = [90, 180, 270]
+    for angle in rotations:
+        rotated_img = rotate(img, 360-angle) * 255
+        rotated_img = rotated_img.astype('uint8')
+        new_polygons = []
+        for polygon in polygons:
+            lbl, score, xmin, ymin, xmax, ymax = polygon
+            new_xmin, new_ymin = change_coordinates((xmin, ymin), new_roots[angle], angle)
+            new_xmax, new_ymax = change_coordinates((xmax, ymax), new_roots[angle], angle)
+            new_polygon = [lbl, score, new_xmin, new_ymin, new_xmax, new_ymax]
+            new_polygons.append(new_polygon)
+
+        augmentations[f"rot{angle}"] = (rotated_img, new_polygons)
+
+    return augmentations
+
+
 def create_dataset(data_path, target_image_path, target_annotation_path):
     dataset = load_dataset(data_path)
     for img_id, record in dataset.items():
@@ -225,23 +310,28 @@ def create_dataset(data_path, target_image_path, target_annotation_path):
             filename = f"{img_id}_{idx}"
             # display_image(window[0], window[1])
 
+            augs = create_augmentations(window[0], window[1])
+            print(f"-- window {idx} :: created {len(augs)} augmentations...")
+
             from PIL import Image
-            im = Image.fromarray(window[0])
-            im.save(os.path.join(target_image_path, f"{filename}.jpg"))
 
-            # img = array_to_img(window[0])
-            # img.save(os.path.join(target_image_path, f"{filename}.jpg"), format="JPEG")
+            for aug_title, aug in augs.items():
+                img, polygons = aug
 
-            create_xml(window[1], 300, 300, os.path.join(TARGET_ANNOTAIONS, f"{filename}.xml"))
-        print("-- done")
+                im = Image.fromarray(img)
+                im.save(os.path.join(target_image_path, f"{filename}_{aug_title}.jpg"))
+
+                create_xml(polygons, 300, 300, os.path.join(TARGET_ANNOTATIONS, f"{filename}_{aug_title}.xml"))
+
+        print(f"-- {img_id} done")
 
 
 if __name__ == "__main__":
-    DATASET_PATH = "data"
+    DATASET_PATH = os.path.join("data", "raw")
     TARGET_IMAGES = os.path.join("data_xml", "images")
-    TARGET_ANNOTAIONS = os.path.join("data_xml", "annotations")
+    TARGET_ANNOTATIONS = os.path.join("data_xml", "annotations")
 
-    create_dataset(DATASET_PATH, TARGET_IMAGES, TARGET_ANNOTAIONS)
+    create_dataset(DATASET_PATH, TARGET_IMAGES, TARGET_ANNOTATIONS)
 
 
     # dataset = load_dataset(DATASET_PATH)

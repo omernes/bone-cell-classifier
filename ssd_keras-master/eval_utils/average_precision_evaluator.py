@@ -52,7 +52,8 @@ class Evaluator:
                  data_generator,
                  model_mode='inference',
                  pred_format={'class_id': 0, 'conf': 1, 'xmin': 2, 'ymin': 3, 'xmax': 4, 'ymax': 5},
-                 gt_format={'class_id': 0, 'xmin': 1, 'ymin': 2, 'xmax': 3, 'ymax': 4}):
+                 gt_format={'class_id': 0, 'xmin': 1, 'ymin': 2, 'xmax': 3, 'ymax': 4},
+                 bypass=False):
         '''
         Arguments:
             model (Keras model): A Keras SSD model object.
@@ -91,6 +92,9 @@ class Evaluator:
         self.cumulative_recalls = None # "Cumulative" means that the i-th element in each list represents the recall for the first i highest condidence predictions for that class.
         self.average_precisions = None
         self.mean_average_precision = None
+
+        self.bypass = bypass
+        self.ground_truth = {}
 
     def __call__(self,
                  img_height,
@@ -586,7 +590,7 @@ class Evaluator:
             and cumulative false positives for each class.
         '''
 
-        if self.data_generator.labels is None:
+        if not self.bypass and self.data_generator.labels is None:
             raise ValueError("Matching predictions to ground truth boxes not possible, no ground truth given.")
 
         if self.prediction_results is None:
@@ -600,15 +604,19 @@ class Evaluator:
 
         # Convert the ground truth to a more efficient format for what we need
         # to do, which is access ground truth by image ID repeatedly.
-        ground_truth = {}
-        eval_neutral_available = not (self.data_generator.eval_neutral is None) # Whether or not we have annotations to decide whether ground truth boxes should be neutral or not.
-        for i in range(len(self.data_generator.image_ids)):
-            image_id = str(self.data_generator.image_ids[i])
-            labels = self.data_generator.labels[i]
-            if ignore_neutral_boxes and eval_neutral_available:
-                ground_truth[image_id] = (np.asarray(labels), np.asarray(self.data_generator.eval_neutral[i]))
-            else:
-                ground_truth[image_id] = np.asarray(labels)
+        if self.bypass:
+            eval_neutral_available = True
+            ground_truth = self.ground_truth
+        else:
+            ground_truth = {}
+            eval_neutral_available = not (self.data_generator.eval_neutral is None) # Whether or not we have annotations to decide whether ground truth boxes should be neutral or not.
+            for i in range(len(self.data_generator.image_ids)):
+                image_id = str(self.data_generator.image_ids[i])
+                labels = self.data_generator.labels[i]
+                if ignore_neutral_boxes and eval_neutral_available:
+                    ground_truth[image_id] = (np.asarray(labels), np.asarray(self.data_generator.eval_neutral[i]))
+                else:
+                    ground_truth[image_id] = np.asarray(labels)
 
         true_positives = [[]] # The false positives for each class, sorted by descending confidence.
         false_positives = [[]] # The true positives for each class, sorted by descending confidence.
@@ -776,12 +784,17 @@ class Evaluator:
             if verbose:
                 print("Computing precisions and recalls, class {}/{}".format(class_id, self.n_classes))
 
-            tp = self.cumulative_true_positives[class_id]
-            fp = self.cumulative_false_positives[class_id]
+            try:
+                tp = self.cumulative_true_positives[class_id]
+                fp = self.cumulative_false_positives[class_id]
 
 
-            cumulative_precision = np.where(tp + fp > 0, tp / (tp + fp), 0) # 1D array with shape `(num_predictions,)`
-            cumulative_recall = tp / self.num_gt_per_class[class_id] # 1D array with shape `(num_predictions,)`
+                cumulative_precision = np.where(tp + fp > 0, tp / (tp + fp), 0) # 1D array with shape `(num_predictions,)`
+                cumulative_recall = tp / self.num_gt_per_class[class_id] # 1D array with shape `(num_predictions,)`
+            except IndexError as e:
+                print(e)
+                cumulative_precision = np.zeros((1,))
+                cumulative_recall = np.zeros((1,))
 
             cumulative_precisions.append(cumulative_precision)
             cumulative_recalls.append(cumulative_recall)

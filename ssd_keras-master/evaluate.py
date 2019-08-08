@@ -58,9 +58,7 @@ normalize_coords = True
 #            'horse', 'motorbike', 'person', 'pottedplant',
 #            'sheep', 'sofa', 'train', 'tvmonitor']
 
-classes = ['background',
-           '0_1', '0_2', '0_3', 'g',
-           'p']
+classes = ['background', '0_1', '0_2', '0_3', 'g', 'p']
 
 # For the validation generator:
 ssd_loss = SSDLoss(neg_pos_ratio=3, alpha=1.0)
@@ -128,74 +126,59 @@ sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
 model.compile(optimizer=sgd, loss=ssd_loss.compute_loss)
 
 
-
-
-
-
-for i in range(500):
+results = {}
+print("size ::", val_dataset.dataset_size)
+for j in range(val_dataset.dataset_size):
     # 2: Generate samples.
+    try:
+        batch_images, batch_filenames, batch_inverse_transforms, batch_original_images, batch_original_labels = next(
+            predict_generator)
 
-    batch_images, batch_filenames, batch_inverse_transforms, batch_original_images, batch_original_labels = next(
-        predict_generator)
-
-    i = 0  # Which batch item to look at
-
-    print("Image:", batch_filenames[i])
-    print()
-    print("Ground truth boxes:\n")
-    print(np.array(batch_original_labels[i]))
-
-    y_pred = model.predict(batch_images)
-
-    # 4: Decode the raw predictions in `y_pred`.
-
-    y_pred_decoded = decode_detections(y_pred,
-                                       confidence_thresh=0.5,
-                                       iou_threshold=0.4,
-                                       top_k=200,
-                                       normalize_coords=normalize_coords,
-                                       img_height=img_height,
-                                       img_width=img_width)
-
-    # 5: Convert the predictions for the original image.
-
-    y_pred_decoded_inv = apply_inverse_transforms(y_pred_decoded, batch_inverse_transforms)
-
-    np.set_printoptions(precision=2, suppress=True, linewidth=90)
-
-    print("Predicted boxes:\n")
-    print('   class   conf xmin   ymin   xmax   ymax')
-    print(y_pred_decoded_inv[i])
+        # tmp = batch_filenames[i].split("/")
 
 
-    # 5: Draw the predicted boxes onto the image
+        i = 0  # Which batch item to look at
 
-    # Set the colors for the bounding boxes
-    colors = plt.cm.hsv(np.linspace(0, 1, n_classes+1)).tolist()
+        img_id = batch_filenames[i][-15:-4].strip("/")
 
-    plt.figure(figsize=(20,12))
-    plt.imshow(batch_original_images[i])
+        print("Image:", batch_filenames[i])
+        print(f"Image ID: {img_id}")
+        print(j)
+        # print()
+        print("Ground truth boxes:\n")
+        print(np.array(batch_original_labels[i]))
 
-    current_axis = plt.gca()
+        y_pred = model.predict(batch_images)
 
-    for box in batch_original_labels[i]:
-        xmin = box[1]
-        ymin = box[2]
-        xmax = box[3]
-        ymax = box[4]
-        label = '{}'.format(classes[int(box[0])])
-        current_axis.add_patch(plt.Rectangle((xmin, ymin), xmax-xmin, ymax-ymin, color='green', fill=False, linewidth=2))
-        current_axis.text(xmin, ymax, label, size='x-large', color='white', bbox={'facecolor':'green', 'alpha':1.0})
+        # 4: Decode the raw predictions in `y_pred`.
 
-    for box in y_pred_decoded_inv[i]:
-        xmin = box[2]
-        ymin = box[3]
-        xmax = box[4]
-        ymax = box[5]
-        color = colors[int(box[0])]
-        label = '{}: {:.2f}'.format(classes[int(box[0])], box[1])
-        current_axis.add_patch(plt.Rectangle((xmin, ymin), xmax-xmin, ymax-ymin, color=color, fill=False, linewidth=2))
-        current_axis.text(xmin, ymin, label, size='x-large', color='white', bbox={'facecolor':color, 'alpha':1.0})
+        y_pred_decoded = decode_detections(y_pred,
+                                           confidence_thresh=0.5,
+                                           iou_threshold=0.4,
+                                           top_k=200,
+                                           normalize_coords=normalize_coords,
+                                           img_height=img_height,
+                                           img_width=img_width)
 
+        # 5: Convert the predictions for the original image.
 
-    print("hi")
+        y_pred_decoded_inv = apply_inverse_transforms(y_pred_decoded, batch_inverse_transforms)
+
+        np.set_printoptions(precision=2, suppress=True, linewidth=90)
+
+        # print("Predicted boxes:\n")
+        # print('   class   conf xmin   ymin   xmax   ymax')
+        # print(y_pred_decoded_inv[i])
+
+        results[img_id] = (y_pred_decoded_inv[i])
+        print(y_pred_decoded_inv[i])
+    except Exception as e:
+        print(e)
+
+# print(results)
+import pickle
+
+with open("results.pkl", "wb") as f:
+    dump = pickle.dumps(results)
+    f.write(dump)
+    print("saved")
