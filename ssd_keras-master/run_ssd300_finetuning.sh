@@ -16,7 +16,7 @@ export TEST_IMAGESET_FILENAME=/vol/scratch/bone_cell/data_xml/test.txt
 
 export WEIGHTS_PATH=data/VGG_VOC0712_SSD_300x300_iter_120000_subsampled_6_classes.h5
 export SAVE_IN_MEMORY=1
-export MODEL_PATH="/vol/scratch/bone_cell_models/ssd300_bone-cell-dataset_epoch-04_loss-4.5842_val_loss-4.0922.h5"
+export MODEL_PATH="/vol/scratch/bone_cell/models/ssd300_bone-cell-dataset_epoch-04_loss-4.5842_val_loss-4.0922.h5"
 export NUM_CLASSES=5
 export BATCH_SIZE=32
 
