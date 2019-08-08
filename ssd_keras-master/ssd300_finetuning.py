@@ -95,10 +95,10 @@ else:
     #    If you want to follow the original Caffe implementation, use the preset SGD
     #    optimizer, otherwise I'd recommend the commented-out Adam optimizer.
 
-    # adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
+    adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    # sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
 
-    model.compile(optimizer=sgd, loss=ssd_loss.compute_loss)
+    model.compile(optimizer=adam, loss=ssd_loss.compute_loss)
 
 ## 3. Set up the data generators for the training
 
