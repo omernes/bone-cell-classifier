@@ -1,4 +1,6 @@
 import io
+import random
+
 from PIL import Image
 import base64
 import os
@@ -170,11 +172,12 @@ def change_coordinates(point, new_root, angle):
 def cut_window_from_image(img, polygons, xy=(0, 0), window_size=(300, 300), angle=0):
     x, y = xy
     width, height = window_size
-    if x + width > img.shape[0] or y + height > img.shape[1]:
+    # if x + width > img.shape[0] or y + height > img.shape[1]:
+    if x + width > img.shape[1] or y + height > img.shape[0]:
         return None
 
     # window_img = img[x:x + width, y:y + height]
-    window_img = img[y:y + width, x:x+height]
+    window_img = img[y:y + height, x:x+width]
     window_polygons = []
 
 
@@ -191,7 +194,7 @@ def cut_window_from_image(img, polygons, xy=(0, 0), window_size=(300, 300), angl
 
 
 def create_sliding_windows(img, polygons, size=(300, 300), step=300):
-    width, height = img.shape[0], img.shape[1]
+    height, width = img.shape[0], img.shape[1]
     win_width, win_height = size
 
     windows = {}
@@ -223,25 +226,6 @@ def create_xml(polygons, width, height, path_to_save):
     writer.save(path_to_save)
     # return json.dumps(polygons)
 
-# def augment_image(img):
-#     #     print("flipping...")
-#     horizontal_flip = img[:, ::-1]
-#     vertical_flip = img[::-1, :]
-#     #     print("rotating...")
-#     rotation_90 = rotate(img, 90)
-#     rotation_180 = rotate(img, 180)
-#     rotation_270 = rotate(img, 270)
-#     new_images_set = [horizontal_flip, vertical_flip, rotation_270, rotation_180,
-#                       rotation_90]
-#     aug_imgs = {
-#         "orig": img,
-#         "rot_90": rotation_90,
-#         "rot_180": rotation_180,
-#         "rot_270": rotation_270,
-#         "flip_hor": horizontal_flip,
-#         "flip_ver": vertical_flip
-#     }
-#     return aug_imgs
 
 # polygons = list of lists
 # img = ndarray
@@ -310,6 +294,9 @@ def create_dataset(data_path, target_image_path, target_annotation_path):
             filename = f"{img_id}_{idx}"
             # display_image(window[0], window[1])
 
+            if window[0].shape != (300, 300, 3):
+                print(f"!!! {filename} :: {window[0].shape}")
+
             augs = create_augmentations(window[0], window[1])
             print(f"-- window {idx} :: created {len(augs)} augmentations...")
 
@@ -326,13 +313,55 @@ def create_dataset(data_path, target_image_path, target_annotation_path):
         print(f"-- {img_id} done")
 
 
+def create_dataset_split_files(TARGET_DIR, IMAGES_DIR, ANNOTATIONS_DIR):
+    filenames = []
+
+    for root, dirs, files in os.walk(IMAGES_DIR):
+        for file in files:
+            filenames.append(file[:-4])
+
+    final = []
+    for filename in filenames:
+        if os.path.exists(os.path.join(ANNOTATIONS_DIR, f"{filename}.xml")):
+            final.append(filename)
+
+    # final = filenames
+
+    print(final[:5])
+    print(len(final))
+    idx1 = int(0.7 * len(final))
+    idx2 = int(0.85 * len(final))
+
+    random.shuffle(final)
+
+    train_files = final[:idx1]
+    val_files = final[idx1:idx2]
+    test_files = final[idx2:]
+
+    print(f"Train samples: {len(train_files)}")
+    print(f"Validation samples: {len(val_files)}")
+    print(f"Test samples: {len(test_files)}")
+
+    with open(os.path.join(TARGET_DIR, "train.txt"), "w") as f:
+        f.write("\n".join(train_files) + "\n")
+
+    with open(os.path.join(TARGET_DIR, "val.txt"), "w") as f:
+        f.write("\n".join(val_files) + "\n")
+
+    with open(os.path.join(TARGET_DIR, "test.txt"), "w") as f:
+        f.write("\n".join(test_files) + "\n")
+
 if __name__ == "__main__":
     DATASET_PATH = os.path.join("data", "raw")
     TARGET_IMAGES = os.path.join("data_xml", "images")
     TARGET_ANNOTATIONS = os.path.join("data_xml", "annotations")
 
-    create_dataset(DATASET_PATH, TARGET_IMAGES, TARGET_ANNOTATIONS)
+    # os.makedirs(DATASET_PATH, exist_ok=True)
+    os.makedirs(TARGET_IMAGES, exist_ok=True)
+    os.makedirs(TARGET_ANNOTATIONS, exist_ok=True)
 
+    create_dataset(DATASET_PATH, TARGET_IMAGES, TARGET_ANNOTATIONS)
+    create_dataset_split_files("data_xml", TARGET_IMAGES, TARGET_ANNOTATIONS)
 
     # dataset = load_dataset(DATASET_PATH)
     # img = dataset["B2_03_03"]["image"]

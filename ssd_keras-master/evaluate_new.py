@@ -14,9 +14,9 @@ from keras_loss_function.keras_ssd_loss import SSDLoss
 from models.keras_ssd300 import ssd_300
 from ssd_encoder_decoder.ssd_output_decoder import decode_detections
 
-images_dir = "data_xml/images"
-annotations_dir = "data_xml/annotations"
-image_set_filename = "data_xml/test.txt"
+images_dir = "../data_xml/images"
+annotations_dir = "../data_xml/annotations"
+image_set_filename = "../data_xml/test.txt"
 
 classes = ['background', '0_1', '0_2', '0_3', 'p', 'g']
 
@@ -81,7 +81,8 @@ def get_model():
     convert_to_3_channels = ConvertTo3Channels()
     resize = Resize(height=img_height, width=img_width)
 
-    MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-22_loss-3.2010_val_loss-2.7213_weights-only.h5"
+    # MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-22_loss-3.2010_val_loss-2.7213_weights-only.h5"
+    MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-36_loss-4.1874_val_loss-3.7776_weights-only.h5"
 
     K.clear_session()
     model = ssd_300(image_size=(img_height, img_width, img_channels),
