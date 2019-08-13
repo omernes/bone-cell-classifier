@@ -297,18 +297,25 @@ def create_dataset(data_path, target_image_path, target_annotation_path):
             if window[0].shape != (300, 300, 3):
                 print(f"!!! {filename} :: {window[0].shape}")
 
-            augs = create_augmentations(window[0], window[1])
-            print(f"-- window {idx} :: created {len(augs)} augmentations...")
+            # augs = create_augmentations(window[0], window[1])
+            # print(f"-- window {idx} :: created {len(augs)} augmentations...")
 
             from PIL import Image
 
-            for aug_title, aug in augs.items():
-                img, polygons = aug
+            img, polygons = window[0], window[1]
 
-                im = Image.fromarray(img)
-                im.save(os.path.join(target_image_path, f"{filename}_{aug_title}.jpg"))
+            im = Image.fromarray(img)
+            im.save(os.path.join(target_image_path, f"{filename}.jpg"))
 
-                create_xml(polygons, 300, 300, os.path.join(TARGET_ANNOTATIONS, f"{filename}_{aug_title}.xml"))
+            create_xml(polygons, 300, 300, os.path.join(TARGET_ANNOTATIONS, f"{filename}.xml"))
+
+            # for aug_title, aug in augs.items():
+            #     img, polygons = aug
+            #
+            #     im = Image.fromarray(img)
+            #     im.save(os.path.join(target_image_path, f"{filename}_{aug_title}.jpg"))
+            #
+            #     create_xml(polygons, 300, 300, os.path.join(TARGET_ANNOTATIONS, f"{filename}_{aug_title}.xml"))
 
         print(f"-- {img_id} done")
 

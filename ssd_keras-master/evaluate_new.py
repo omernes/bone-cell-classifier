@@ -82,7 +82,10 @@ def get_model():
     resize = Resize(height=img_height, width=img_width)
 
     # MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-22_loss-3.2010_val_loss-2.7213_weights-only.h5"
-    MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-36_loss-4.1874_val_loss-3.7776_weights-only.h5"
+    # MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-96_loss-3.6839_val_loss-3.3198_weights-only.h5"
+    # MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-36_loss-4.1874_val_loss-3.7776_weights-only.h5"
+
+    MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-24_loss-4.2116_val_loss-3.8493_100819_weights-only.h5"
 
     K.clear_session()
     model = ssd_300(image_size=(img_height, img_width, img_channels),
