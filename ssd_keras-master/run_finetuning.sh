@@ -26,6 +26,8 @@ export CHECKPOINT_PERIOD=1
 export STEPS_PER_EPOCH=1000
 export MODEL_CHECKPOINT_PATH=/vol/scratch/bone_cell/models
 
+export ENABLE_SSD_EXPAND=1
+
 export CUDA_VISIBLE_DEVICES=1,2,4,5,6,7
 
 /home/gamir/edocohen/anaconda3/envs/bone_cell_py37/bin/python finetuning.py
