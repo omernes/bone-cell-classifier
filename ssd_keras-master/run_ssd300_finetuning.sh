@@ -21,10 +21,10 @@ export NUM_CLASSES=5
 export BATCH_SIZE=32
 
 export INITIAL_EPOCH=0
-export FINAL_EPOCH=100
+export FINAL_EPOCH=40
 export CHECKPOINT_PERIOD=1
 export STEPS_PER_EPOCH=1000
-export MODEL_CHECKPOINT_PATH=/vol/scratch/bone_cell/models
+export MODEL_CHECKPOINT_PATH=/vol/scratch/bone_cell/models/100819
 
 export CUDA_VISIBLE_DEVICES=1,2,4,5,6,7
 
