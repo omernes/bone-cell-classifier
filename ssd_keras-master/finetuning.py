@@ -22,7 +22,7 @@ from ssd_encoder_decoder.ssd_output_decoder import decode_detections, decode_det
 from data_generator.object_detection_2d_data_generator import DataGenerator
 from data_generator.object_detection_2d_geometric_ops import Resize, RandomFlip, RandomTranslate
 from data_generator.object_detection_2d_photometric_ops import ConvertTo3Channels, ConvertDataType
-from data_generator.data_augmentation_chain_original_ssd import SSDDataAugmentation
+from data_generator.data_augmentation_chain_original_ssd import SSDDataAugmentation, SSDExpand
 from data_generator.object_detection_2d_misc_utils import apply_inverse_transforms
 
 SAVE_IN_MEMORY = bool(int(getenv("SAVE_IN_MEMORY", "0")))
@@ -59,6 +59,8 @@ clip_boxes = False  # Whether or not to clip the anchor boxes to lie entirely wi
 variances = [0.1, 0.1, 0.2,
              0.2]  # The variances by which the encoded target coordinates are divided as in the original implementation
 normalize_coords = True
+
+enable_ssd_expand = bool(int(getenv("ENABLE_SSD_EXPAND", "0")))
 
 ## 2. Build or load the model
 
@@ -194,6 +196,8 @@ resize                = Resize(height=img_height, width=img_width)
 random_flip_hor           = RandomFlip(dim='horizontal', prob=0.5)
 random_flip_ver           = RandomFlip(dim='vertical', prob=0.5)
 
+ssd_expand = SSDExpand()
+
 box_filter = BoxFilter(overlap_criterion='area',
                        overlap_bounds=(0.4, 1.0))
 image_validator = ImageValidator(overlap_criterion='area',
@@ -207,7 +211,12 @@ random_translate = RandomTranslate(dy_minmax=(0.03,0.3),
                                    image_validator=image_validator,
                                    n_trials_max=3)
 
-augmentations = [convert_to_3_channels, convert_to_uint8, random_flip_hor, random_flip_ver, random_translate, resize]
+augmentations = [convert_to_3_channels, convert_to_uint8, random_flip_hor, random_flip_ver, random_translate]
+
+if enable_ssd_expand:
+    augmentations.append(ssd_expand)
+
+augmentations.append(resize)
 
 # 6: Create the generator handles that will be passed to Keras' `fit_generator()` function.
 
