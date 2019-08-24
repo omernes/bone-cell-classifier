@@ -19,9 +19,9 @@ from ssd_encoder_decoder.ssd_output_decoder import decode_detections
 # images_dir = getenv("IMAGES_DIR")
 # annotations_dir = getenv("ANNOTATIONS_DIR")
 # image_set_filename = getenv("DATASET_FILENAME")
-images_dir = "data_xml/images"
-annotations_dir = "data_xml/annotations"
-image_set_filename = "data_xml/test_new.txt"
+images_dir = "../data_xml/images"
+annotations_dir = "../data_xml/annotations"
+image_set_filename = "../data_xml/test_new.txt"
 
 img_height = 300  # Height of the model input images
 img_width = 300  # Width of the model input images
@@ -95,7 +95,7 @@ predict_generator = val_dataset.generate(batch_size=1,
 
 # 3: Make predictions.
 # MODEL_WEIGHTS_PATH = getenv("MODEL_WEIGHTS_PATH")
-MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-22_loss-3.2010_val_loss-2.7213_weights-only.h5"
+MODEL_WEIGHTS_PATH = "../ssd300_bone-cell-dataset_epoch-97_loss-2.6546_val_loss-2.4012_weights-only.h5"
 
 K.clear_session()
 model = ssd_300(image_size=(img_height, img_width, img_channels),

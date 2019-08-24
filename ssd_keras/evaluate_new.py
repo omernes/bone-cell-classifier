@@ -85,7 +85,10 @@ def get_model():
     # MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-96_loss-3.6839_val_loss-3.3198_weights-only.h5"
     # MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-36_loss-4.1874_val_loss-3.7776_weights-only.h5"
 
-    MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-24_loss-4.2116_val_loss-3.8493_100819_weights-only.h5"
+    # MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-24_loss-4.2116_val_loss-3.8493_100819_weights-only.h5"
+    # MODEL_WEIGHTS_PATH = "../ssd300_bone-cell-dataset_epoch-97_loss-2.6546_val_loss-2.4012_weights-only.h5"
+    MODEL_WEIGHTS_PATH = "../ssd300_bone-cell-dataset_epoch-85_loss-3.1325_val_loss-2.3432_zoom_out_dataset_weights-only.h5"
+
 
     K.clear_session()
     model = ssd_300(image_size=(img_height, img_width, img_channels),

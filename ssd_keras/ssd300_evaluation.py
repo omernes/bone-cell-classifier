@@ -65,7 +65,8 @@ RESULTS_PATH = getenv("RESULTS_PATH", "results_boxes.json")
 #                                                'DecodeDetections': DecodeDetections,
 #                                                'compute_loss': ssd_loss.compute_loss})
 
-MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-22_loss-3.2010_val_loss-2.7213_weights-only.h5"
+# MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-22_loss-3.2010_val_loss-2.7213_weights-only.h5"
+MODEL_WEIGHTS_PATH = "../ssd300_bone-cell-dataset_epoch-97_loss-2.6546_val_loss-2.4012_weights-only.h5"
 
 K.clear_session()
 model = ssd_300(image_size=(img_height, img_width, img_channels),
@@ -104,9 +105,9 @@ dataset = DataGenerator()
 # VOC_2007_TEST_images_dir = getenv('IMAGES_DIR_2007_TEST', 'datasets/VOCdevkit/VOC2007/JPEGImages/')
 # VOC_2007_TEST_annotations_dir = getenv('ANNOT_DIR_2007_TEST', 'datasets/VOCdevkit/VOC2007/Annotations/')
 # VOC_2007_test_image_set_filename = getenv('IMAGESET_TEST_2007', 'datasets/VOCdevkit/VOC2007/ImageSets/Main/test.txt')
-IMAGES_DIR = getenv("IMAGES_DIR", "data_xml/images")
-ANNOTATIONS_DIR = getenv("ANNOTATIONS_DIR", "data_xml/annotations")
-IMAGESET_FILENAME = getenv("IMAGESET_FILENAME", "data_xml/test_new.txt")
+IMAGES_DIR = getenv("IMAGES_DIR", "../data_xml/images")
+ANNOTATIONS_DIR = getenv("ANNOTATIONS_DIR", "../data_xml/annotations")
+IMAGESET_FILENAME = getenv("IMAGESET_FILENAME", "../data_xml/test.txt")
 
 # Pascal_VOC_dataset_images_dir = '../../datasets/VOCdevkit/VOC2007/JPEGImages/'
 # Pascal_VOC_dataset_annotations_dir = '../../datasets/VOCdevkit/VOC2007/Annotations/'
