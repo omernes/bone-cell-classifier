@@ -32,7 +32,7 @@ WEIGHTS_PATH = getenv("WEIGHTS_PATH", "")
 
 OPTIMIZER = getenv("OPTIMIZER", "ADAM")
 LEARNING_RATE = getenv("LEARNING_RATE", "0.001")
-learning_rate = int(LEARNING_RATE)
+learning_rate = float(LEARNING_RATE)
 
 ## 1. Set the model configuration parameters
 
