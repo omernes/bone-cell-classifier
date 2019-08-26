@@ -19,6 +19,7 @@ export SAVE_IN_MEMORY=1
 export MODEL_PATH=""
 export NUM_CLASSES=5
 export BATCH_SIZE=32
+export OPTIMIZER="SGD"
 
 export INITIAL_EPOCH=0
 export FINAL_EPOCH=100
