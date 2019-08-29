@@ -1,3 +1,5 @@
+import json
+
 from PIL import Image
 import numpy
 import matplotlib.pyplot as plt
@@ -29,14 +31,16 @@ def process_image(path):  # path should be path to image
 
     best_boxes = find_best_boxes(boxes)
 
+    save_results(best_boxes)
+
     # display_image(im, boxes)
     # display_image(im, best_boxes)
 
-    print(f"boxes :: {len(boxes)}")
-    print(f"best boxes :: {len(best_boxes)}")
-
-    counts = count_cells(best_boxes)
-    print(counts)
+    # print(f"boxes :: {len(boxes)}")
+    # print(f"best boxes :: {len(best_boxes)}")
+    #
+    # counts = count_cells(best_boxes)
+    # print(counts)
 
     # save results to json (counters and boxes)
     # save plot as image (with boxes)
@@ -187,6 +191,24 @@ def count_cells(boxes):
             o3_cnt = o3_cnt + 1
     total_o_cnt = o1_cnt + o2_cnt + o3_cnt
     return total_o_cnt, o1_cnt, o2_cnt, o3_cnt, ghost_cnt, pre_cnt
+
+
+def save_results(boxes):
+    total_osteo_cnt, cnt_01, cnt_02, cnt_03, ghost_cnt, pre_cnt = count_cells(boxes)
+    cnt_dict = {}
+    cnt_dict['ghost'] = ghost_cnt
+    cnt_dict['pre'] = pre_cnt
+    cnt_dict['0_1'] = cnt_01
+    cnt_dict['0_2'] = cnt_02
+    cnt_dict['0_3'] = cnt_03
+    cnt_dict['total_osteo'] = total_osteo_cnt
+    data = {}
+    data['counts'] = cnt_dict
+    data['boxes'] = boxes
+
+    with open("results.json", "w") as f:
+        json_data = json.dumps(data)
+        f.write(json_data)
 
 
 if __name__ == "__main__":

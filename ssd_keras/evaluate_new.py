@@ -76,7 +76,7 @@ def read_content(xml_file: str):
     return list_with_all_boxes
 
 
-def get_model():
+def get_model(weights_path):
     ssd_loss = SSDLoss(neg_pos_ratio=3, alpha=1.0)
     convert_to_3_channels = ConvertTo3Channels()
     resize = Resize(height=img_height, width=img_width)
@@ -87,7 +87,7 @@ def get_model():
 
     # MODEL_WEIGHTS_PATH = "ssd300_bone-cell-dataset_epoch-24_loss-4.2116_val_loss-3.8493_100819_weights-only.h5"
     # MODEL_WEIGHTS_PATH = "../ssd300_bone-cell-dataset_epoch-97_loss-2.6546_val_loss-2.4012_weights-only.h5"
-    MODEL_WEIGHTS_PATH = "../ssd300_bone-cell-dataset_epoch-85_loss-3.1325_val_loss-2.3432_zoom_out_dataset_weights-only.h5"
+    # MODEL_WEIGHTS_PATH = "../ssd300_bone-cell-dataset_epoch-85_loss-3.1325_val_loss-2.3432_zoom_out_dataset_weights-only.h5"
 
 
     K.clear_session()
@@ -107,7 +107,7 @@ def get_model():
                     swap_channels=swap_channels)
 
     # 2: Load some weights into the model.
-    model.load_weights(MODEL_WEIGHTS_PATH, by_name=True)
+    model.load_weights(weights_path, by_name=True)
 
     sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
 
@@ -116,12 +116,12 @@ def get_model():
     return model
 
 
-def evaluate_dataset(imageset_path):
+def evaluate_dataset(imageset_path, model):
     filenames = []
     with open(imageset_path, "r") as f:
         filenames = f.read()
 
-    model = get_model()
+
     i = 0
     dataset = {}
 
@@ -135,7 +135,7 @@ def evaluate_dataset(imageset_path):
 
         img_id = filename
         i += 1
-        print(f"{i}/{len(filenames)}")
+        # print(f"{i}/{len(filenames)}")
 
         img = numpy.asarray(Image.open(os.path.join(images_dir, f"{filename}.jpg")))
         gt_boxes = read_content(os.path.join(annotations_dir, f"{filename}.xml"))
@@ -221,8 +221,34 @@ def evaluate_dataset(imageset_path):
 
 
 if __name__ == "__main__":
-    evaluation = evaluate_dataset(image_set_filename)
-    mean_average_precision, average_precisions, cumulative_precisions, cumulative_recalls = evaluation
+    import os
 
-    print(f"mAP: {mean_average_precision}")
-    print(f"average_precisions: {average_precisions}")
+    done = [
+        # "batch16_epoch100_loss-3.2165_val_loss-2.4216_weights-only.h5"
+        "batch2_epoch54_loss-4.9311_val_loss-3.7973_weights-only.h5",
+        "batch16_epoch196_loss-3.1003_val_loss-2.3109_weights-only.h5",
+        "batch2_epoch197_loss-4.2264_val_loss-3.2413_weights-only.h5",
+        "sgd_batch16_epoch50_loss-3.0744_val_loss-2.2321_weights-only.h5"
+    ]
+
+    for root, dir, files in os.walk('../models'):
+        for file in files:
+            if 'weights-only' in file:
+                if file in done:
+                    print(f"skipping {file}")
+                    continue
+
+                print("")
+                print("----------------------")
+                print("")
+                print(f"Starting evaluation :: {file}")
+
+                model = get_model(os.path.join("..", "models", file))
+                # print(model.summary())
+                evaluation = evaluate_dataset(image_set_filename, model)
+                mean_average_precision, average_precisions, cumulative_precisions, cumulative_recalls = evaluation
+
+                print(f"{file}")
+                print(f"mAP: {mean_average_precision}")
+                print(f"average_precisions: {average_precisions}")
+
