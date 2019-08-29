@@ -1,0 +1,92 @@
+<annotation>
+    <folder>ml-workshop</folder>
+    <filename>bone-cell-classifier</filename>
+    <path>/home/omer/uni/ml-workshop/bone-cell-classifier</path>
+    <source>
+        <database>Unknown</database>
+    </source>
+    <size>
+        <width>300</width>
+        <height>300</height>
+        <depth>3</depth>
+    </size>
+    <segmented>0</segmented>
+    <object>
+        <name>p</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>33</xmin>
+            <ymin>177</ymin>
+            <xmax>58</xmax>
+            <ymax>202</ymax>
+        </bndbox>
+    </object>    <object>
+        <name>p</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>207</xmin>
+            <ymin>170</ymin>
+            <xmax>241</xmax>
+            <ymax>211</ymax>
+        </bndbox>
+    </object>    <object>
+        <name>0_2</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>155</xmin>
+            <ymin>291</ymin>
+            <xmax>212</xmax>
+            <ymax>300</ymax>
+        </bndbox>
+    </object>    <object>
+        <name>0_2</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>220</xmin>
+            <ymin>86</ymin>
+            <xmax>300</xmax>
+            <ymax>155</ymax>
+        </bndbox>
+    </object>    <object>
+        <name>p</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>268</xmin>
+            <ymin>280</ymin>
+            <xmax>296</xmax>
+            <ymax>300</ymax>
+        </bndbox>
+    </object>    <object>
+        <name>0_2</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>69</xmin>
+            <ymin>256</ymin>
+            <xmax>140</xmax>
+            <ymax>300</ymax>
+        </bndbox>
+    </object>    <object>
+        <name>p</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>103</xmin>
+            <ymin>239</ymin>
+            <xmax>126</xmax>
+            <ymax>263</ymax>
+        </bndbox>
+    </object>
+</annotation>

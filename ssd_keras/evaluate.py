@@ -1,27 +1,20 @@
-from keras.optimizers import SGD
+import os
+import numpy
+from PIL import Image
+import xml.etree.ElementTree as ET
 from keras import backend as K
-from matplotlib import pyplot as plt
-import numpy as np
-from keras.engine.saving import load_model
-from os import getenv
+from keras.optimizers import SGD
 
-from data_generator.object_detection_2d_data_generator import DataGenerator
+from create_dataset import display_image
 from data_generator.object_detection_2d_geometric_ops import Resize
 from data_generator.object_detection_2d_misc_utils import apply_inverse_transforms
 from data_generator.object_detection_2d_photometric_ops import ConvertTo3Channels
-from keras_layers.keras_layer_AnchorBoxes import AnchorBoxes
-from keras_layers.keras_layer_L2Normalization import L2Normalization
+from eval_utils.average_precision_evaluator import Evaluator
 from keras_loss_function.keras_ssd_loss import SSDLoss
 from models.keras_ssd300 import ssd_300
 from ssd_encoder_decoder.ssd_output_decoder import decode_detections
 
-
-# images_dir = getenv("IMAGES_DIR")
-# annotations_dir = getenv("ANNOTATIONS_DIR")
-# image_set_filename = getenv("DATASET_FILENAME")
-images_dir = "../data_xml/images"
-annotations_dir = "../data_xml/annotations"
-image_set_filename = "../data_xml/test_new.txt"
+classes = ['background', '0_1', '0_2', '0_3', 'p', 'g']
 
 img_height = 300  # Height of the model input images
 img_width = 300  # Width of the model input images
@@ -51,104 +44,97 @@ variances = [0.1, 0.1, 0.2,
              0.2]  # The variances by which the encoded target coordinates are divided as in the original implementation
 normalize_coords = True
 
-# classes = ['background',
-#            'aeroplane', 'bicycle', 'bird', 'boat',
-#            'bottle', 'bus', 'car', 'cat',
-#            'chair', 'cow', 'diningtable', 'dog',
-#            'horse', 'motorbike', 'person', 'pottedplant',
-#            'sheep', 'sofa', 'train', 'tvmonitor']
 
-classes = ['background', '0_1', '0_2', '0_3', 'g', 'p']
+def read_content(xml_file: str):
 
-# For the validation generator:
-ssd_loss = SSDLoss(neg_pos_ratio=3, alpha=1.0)
-normalize_coords = True
+    tree = ET.parse(xml_file)
+    root = tree.getroot()
 
-convert_to_3_channels = ConvertTo3Channels()
-resize = Resize(height=img_height, width=img_width)
+    list_with_all_boxes = []
 
-val_dataset = DataGenerator(load_images_into_memory=False, hdf5_dataset_path=None)
+    for boxes in root.iter('object'):
 
-# 1: Set the generator for the predictions.
-val_dataset.parse_xml(images_dirs=[images_dir],
-                      image_set_filenames=[image_set_filename],
-                      annotations_dirs=[annotations_dir],
-                      classes=classes,
-                      include_classes='all',
-                      exclude_truncated=False,
-                      exclude_difficult=True,
-                      ret=False)
+        filename = root.find('filename').text
+        lbl = boxes.find('name').text
+        cat_id = classes.index(lbl)
 
-predict_generator = val_dataset.generate(batch_size=1,
-                                         shuffle=True,
-                                         transformations=[convert_to_3_channels,
-                                                          resize],
-                                         label_encoder=None,
-                                         returns={'processed_images',
-                                                  'filenames',
-                                                  'inverse_transform',
-                                                  'original_images',
-                                                  'original_labels'},
-                                         keep_images_without_gt=False)
+        ymin, xmin, ymax, xmax = None, None, None, None
+
+        for box in boxes.findall("bndbox"):
+            ymin = int(box.find("ymin").text)
+            xmin = int(box.find("xmin").text)
+            ymax = int(box.find("ymax").text)
+            xmax = int(box.find("xmax").text)
+
+        list_with_single_boxes = [cat_id, xmin, ymin, xmax, ymax]
+        list_with_all_boxes.append(list_with_single_boxes)
+
+    return list_with_all_boxes
 
 
+def get_model(weights_path):
+    ssd_loss = SSDLoss(neg_pos_ratio=3, alpha=1.0)
+    convert_to_3_channels = ConvertTo3Channels()
+    resize = Resize(height=img_height, width=img_width)
 
-# 3: Make predictions.
-# MODEL_WEIGHTS_PATH = getenv("MODEL_WEIGHTS_PATH")
-MODEL_WEIGHTS_PATH = "../ssd300_bone-cell-dataset_epoch-97_loss-2.6546_val_loss-2.4012_weights-only.h5"
+    K.clear_session()
+    model = ssd_300(image_size=(img_height, img_width, img_channels),
+                    n_classes=n_classes,
+                    mode='training',
+                    l2_regularization=0.0005,
+                    scales=scales,
+                    aspect_ratios_per_layer=aspect_ratios,
+                    two_boxes_for_ar1=two_boxes_for_ar1,
+                    steps=steps,
+                    offsets=offsets,
+                    clip_boxes=clip_boxes,
+                    variances=variances,
+                    normalize_coords=normalize_coords,
+                    subtract_mean=mean_color,
+                    swap_channels=swap_channels)
 
-K.clear_session()
-model = ssd_300(image_size=(img_height, img_width, img_channels),
-                n_classes=n_classes,
-                mode='training',
-                l2_regularization=0.0005,
-                scales=scales,
-                aspect_ratios_per_layer=aspect_ratios,
-                two_boxes_for_ar1=two_boxes_for_ar1,
-                steps=steps,
-                offsets=offsets,
-                clip_boxes=clip_boxes,
-                variances=variances,
-                normalize_coords=normalize_coords,
-                subtract_mean=mean_color,
-                swap_channels=swap_channels)
+    # 2: Load some weights into the model.
+    model.load_weights(weights_path, by_name=True)
 
-# 2: Load some weights into the model.
-model.load_weights(MODEL_WEIGHTS_PATH, by_name=True)
+    sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
 
-# 3: Instantiate an optimizer and the SSD loss function and compile the model.
-#    If you want to follow the original Caffe implementation, use the preset SGD
-#    optimizer, otherwise I'd recommend the commented-out Adam optimizer.
+    model.compile(optimizer=sgd, loss=ssd_loss.compute_loss)
 
-# adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-sgd = SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=False)
-
-model.compile(optimizer=sgd, loss=ssd_loss.compute_loss)
+    return model
 
 
-results = {}
-print("size ::", val_dataset.dataset_size)
-for j in range(val_dataset.dataset_size):
-    # 2: Generate samples.
-    try:
-        batch_images, batch_filenames, batch_inverse_transforms, batch_original_images, batch_original_labels = next(
-            predict_generator)
-
-        # tmp = batch_filenames[i].split("/")
+def evaluate_dataset(imageset_path, model):
+    filenames = []
+    with open(imageset_path, "r") as f:
+        filenames = f.read()
 
 
-        i = 0  # Which batch item to look at
+    i = 0
+    dataset = {}
 
-        img_id = batch_filenames[i][-15:-4].strip("/")
+    ground_truth = {}
+    prediction_results = [[] for k in range(n_classes + 1)]
 
-        print("Image:", batch_filenames[i])
-        print(f"Image ID: {img_id}")
-        print(j)
-        # print()
-        print("Ground truth boxes:\n")
-        print(np.array(batch_original_labels[i]))
+    filenames = filenames.split("\n")
+    for filename in filenames:
+        if not filename:
+            continue
 
-        y_pred = model.predict(batch_images)
+        img_id = filename
+        i += 1
+        # print(f"{i}/{len(filenames)}")
+
+        img = numpy.asarray(Image.open(os.path.join(images_dir, f"{filename}.jpg")))
+        gt_boxes = read_content(os.path.join(annotations_dir, f"{filename}.xml"))
+
+        # resize = Resize(300, 300, labels_format={'class_id': 0, 'xmin': 1, 'ymin': 2, 'xmax': 3, 'ymax': 4})
+        # inverter = None
+        if img.shape != (300, 300, 3):
+            continue
+
+        dataset[filename] = (img, gt_boxes)
+
+        y_pred = model.predict(numpy.array([img]))
 
         # 4: Decode the raw predictions in `y_pred`.
 
@@ -159,26 +145,63 @@ for j in range(val_dataset.dataset_size):
                                            normalize_coords=normalize_coords,
                                            img_height=img_height,
                                            img_width=img_width)
+        y_pred_decoded = y_pred_decoded[0]
 
-        # 5: Convert the predictions for the original image.
+        ground_truth[img_id] = (numpy.asarray(gt_boxes), numpy.array([False] * len(gt_boxes)))
 
-        y_pred_decoded_inv = apply_inverse_transforms(y_pred_decoded, batch_inverse_transforms)
+        for pred_box in y_pred_decoded:
+            lbl, score, xmin, ymin, xmax, ymax = pred_box
+            # pred_res = (img_id, score, int(xmin), int(ymin), int(xmax), int(ymax))
+            pred_res = (img_id, score, xmin, ymin, xmax, ymax)
+            prediction_results[int(lbl)].append(pred_res)
 
-        np.set_printoptions(precision=2, suppress=True, linewidth=90)
 
-        # print("Predicted boxes:\n")
-        # print('   class   conf xmin   ymin   xmax   ymax')
-        # print(y_pred_decoded_inv[i])
 
-        results[img_id] = (y_pred_decoded_inv[i])
-        print(y_pred_decoded_inv[i])
-    except Exception as e:
-        print(e)
+    evaluator = Evaluator(model=None, n_classes=n_classes, data_generator=None, bypass=True)
 
-# print(results)
-import pickle
+    num_gt_per_class = numpy.array([len(prediction_results[i]) for i in range(n_classes+1)])
+    evaluator.num_gt_per_class = num_gt_per_class
+    evaluator.prediction_results = prediction_results
+    evaluator.ground_truth = ground_truth
 
-with open("results.pkl", "wb") as f:
-    dump = pickle.dumps(results)
-    f.write(dump)
-    print("saved")
+    true_positives, false_positives, cumulative_true_positives, cumulative_false_positives = evaluator.match_predictions(ignore_neutral_boxes=True,
+                               matching_iou_threshold=0.5,
+                               border_pixels='include',
+                               sorting_algorithm='quicksort',
+                               verbose=True,
+                               ret=True)
+
+    cumulative_precisions, cumulative_recalls = evaluator.compute_precision_recall(verbose=True, ret=True)
+
+    #############################################################################################
+    # Compute the average precision for this class.
+    #############################################################################################
+
+    average_precisions = evaluator.compute_average_precisions(mode='sample',
+                                    num_recall_points=11,
+                                    verbose=True,
+                                    ret=True)
+
+    mean_average_precision = evaluator.compute_mean_average_precision(ret=True)
+
+    ret = (mean_average_precision, average_precisions, cumulative_precisions, cumulative_recalls)
+    return ret
+
+
+if __name__ == "__main__":
+    import os
+
+    file = os.getenv("MODEL_WEIGHTS_PATH")
+    images_dir = os.getenv("IMAGES_DIR", "../data_xml/images")
+    annotations_dir = os.getenv("ANNOTATIONS_DIR", "../data_xml/annotations")
+    image_set_filename = os.getenv("IMAGESET_FILENAME", "../data_xml/test.txt")
+
+    print(f"Starting evaluation :: {file}")
+
+    model = get_model(os.path.join("..", "models", file))
+    evaluation = evaluate_dataset(image_set_filename, model)
+    mean_average_precision, average_precisions, cumulative_precisions, cumulative_recalls = evaluation
+
+    print(f"{file}")
+    print(f"mAP: {mean_average_precision}")
+    print(f"average_precisions: {average_precisions}")

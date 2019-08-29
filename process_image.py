@@ -1,5 +1,6 @@
 import json
 
+import os
 from PIL import Image
 import numpy
 import matplotlib.pyplot as plt
@@ -19,34 +20,35 @@ def process_image(path):  # path should be path to image
     # send to sliding window, get list of windows and cords
     windows, cords = create_sliding_windows(img=np_im, size=(300, 300), step=200)
 
+    print(f"Split image to {len(windows)} windows...")
+
     # send each window to predict get back a list of boxes, put in index i of window in pred final list
     preds = []
     model = Model()
+    idx = 1
     for window in windows:
         pred = model.predict(window)
         preds.append(pred)
+        print(f"-- predicted window {idx}...")
+        idx += 1
 
     # send to get abs boxes, get list of all boxes in abs axes
+    print("Converting coordinates to absolute value...")
     boxes = get_absolute_boxes(cords, preds)
 
+    print("Removing overlapping blocks...")
     best_boxes = find_best_boxes(boxes)
 
-    save_results(best_boxes)
+    filename = os.path.basename(img_path).split('.')[0]
 
-    # display_image(im, boxes)
-    # display_image(im, best_boxes)
+    print("Saving results to file...")
+    save_results(best_boxes, f"{filename}_results.json")
 
-    # print(f"boxes :: {len(boxes)}")
-    # print(f"best boxes :: {len(best_boxes)}")
-    #
-    # counts = count_cells(best_boxes)
-    # print(counts)
-
-    # save results to json (counters and boxes)
-    # save plot as image (with boxes)
+    display_image(im, best_boxes, f"{filename}_tagged.png")
 
 
-def display_image(img, boxes):
+
+def display_image(img, boxes, filename, show_image=False):
     colors = plt.cm.hsv(numpy.linspace(0, 1, n_classes + 1)).tolist()
     plt.figure(figsize=(20, 12))
     plt.imshow(img)
@@ -73,10 +75,12 @@ def display_image(img, boxes):
 
             current_axis.add_patch(
                 plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, color=color, fill=False, linewidth=2))
-            current_axis.text(xmin, ymin, lbl, size='x-large', color='white',
-                              bbox={'facecolor': 'green', 'alpha': 1.0})
+            # current_axis.text(xmin, ymin, lbl, size='x-large', color='white',
+            #                   bbox={'facecolor': 'green', 'alpha': 1.0})
 
-    plt.show()
+    plt.savefig(filename)
+    if show_image:
+        plt.show()
 
 
 # cords is a list of touples (one for each window, indexed by the windows) and holds the top left cords for each window [left,top]
@@ -193,7 +197,7 @@ def count_cells(boxes):
     return total_o_cnt, o1_cnt, o2_cnt, o3_cnt, ghost_cnt, pre_cnt
 
 
-def save_results(boxes):
+def save_results(boxes, path_to_save):
     total_osteo_cnt, cnt_01, cnt_02, cnt_03, ghost_cnt, pre_cnt = count_cells(boxes)
     cnt_dict = {}
     cnt_dict['ghost'] = ghost_cnt
@@ -206,11 +210,19 @@ def save_results(boxes):
     data['counts'] = cnt_dict
     data['boxes'] = boxes
 
-    with open("results.json", "w") as f:
+    with open(path_to_save, "w") as f:
         json_data = json.dumps(data)
         f.write(json_data)
 
 
 if __name__ == "__main__":
-    img_path = "data/raw/C2_03_02.png"
+    import sys
+
+    if len(sys.argv) <= 1:
+        print("Please specify an image to process!")
+        exit(1)
+
+    img_path = sys.argv[1]
     process_image(img_path)
+
+
