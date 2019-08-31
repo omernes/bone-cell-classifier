@@ -12,7 +12,7 @@ classes = ['background', '0_1', '0_2', '0_3', 'p', 'g']
 n_classes = 5
 
 
-def process_image(path):  # path should be path to image
+def process_image(path, model_weights_path):  # path should be path to image
     # create matrix from img
     im = Image.open(path)
     np_im = numpy.array(im)
@@ -24,7 +24,7 @@ def process_image(path):  # path should be path to image
 
     # send each window to predict get back a list of boxes, put in index i of window in pred final list
     preds = []
-    model = Model()
+    model = Model(model_weights_path)
     idx = 1
     for window in windows:
         pred = model.predict(window)
@@ -222,7 +222,9 @@ if __name__ == "__main__":
         print("Please specify an image to process!")
         exit(1)
 
+    MODEL_WEIGHTS_PATH = os.getenv("MODEL_WEIGHTS_PATH", "models/sgd_batch16_epoch-197_loss-2.4870_val_loss-1.7650_weights-only.h5")
+
     img_path = sys.argv[1]
-    process_image(img_path)
+    process_image(img_path, MODEL_WEIGHTS_PATH)
 
 

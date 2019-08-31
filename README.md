@@ -29,6 +29,6 @@ The evaluation process is simple: predicting all of the images in the test datas
 
 
 ## Processing an Image
-The script 'process_image.py' receives a path to an image as an argument; it then splits the images to windows using the same method as in creating the dataset, and predicts each part of the image on its own.
+The script 'process_image.py' receives a path to an image as an argument, and path to the model's weights path in an environment variable (MODEL_WEIGHTS_PATH, has a default for the best model trained by us); it then splits the images to windows using the same method as in creating the dataset, and predicts each part of the image on its own.
 After getting all of the predictions, it eliminates overlapping identified cells and keeps only one that are standalone. The script saves the coordinates of the cells in a JSON file along with the counters (for every cell type), and also saves a copy of the image with the cells tagged.
 Both JSON and PNG files are saved to the dirctory the script is in.

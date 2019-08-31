@@ -10,7 +10,9 @@ from ssd_keras.ssd_encoder_decoder.ssd_output_decoder import decode_detections
 
 
 class Model:
-    def __init__(self):
+    def __init__(self, model_weights_path):
+        self.model_weights_path = model_weights_path
+
         self.img_height = 300  # Height of the model input images
         self.img_width = 300  # Width of the model input images
         self.img_channels = 3  # Number of color channels of the model input images
@@ -42,8 +44,6 @@ class Model:
 
         classes = ['background', '0_1', '0_2', '0_3', 'p', 'g']
 
-        MODEL_WEIGHTS_PATH = os.path.join("models", "batch2_epoch197_loss-4.2264_val_loss-3.2413_weights-only.h5")
-
         K.clear_session()
         self.model = ssd_300(image_size=(self.img_height, self.img_width, self.img_channels),
                         n_classes=self.n_classes,
@@ -61,7 +61,7 @@ class Model:
                         swap_channels=self.swap_channels)
 
         # 2: Load some weights into the model.
-        self.model.load_weights(MODEL_WEIGHTS_PATH, by_name=True)
+        self.model.load_weights(model_weights_path, by_name=True)
 
         # 3: Instantiate an optimizer and the SSD loss function and compile the model.
         #    If you want to follow the original Caffe implementation, use the preset SGD
