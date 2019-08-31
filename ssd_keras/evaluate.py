@@ -197,7 +197,7 @@ if __name__ == "__main__":
 
     print(f"Starting evaluation :: {file}")
 
-    model = get_model(os.path.join("..", "models", file))
+    model = get_model(file)
     evaluation = evaluate_dataset(image_set_filename, model)
     mean_average_precision, average_precisions, cumulative_precisions, cumulative_recalls = evaluation
 
