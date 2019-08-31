@@ -5,7 +5,6 @@ import xml.etree.ElementTree as ET
 from keras import backend as K
 from keras.optimizers import SGD
 
-from create_dataset import display_image
 from data_generator.object_detection_2d_geometric_ops import Resize
 from data_generator.object_detection_2d_misc_utils import apply_inverse_transforms
 from data_generator.object_detection_2d_photometric_ops import ConvertTo3Channels
