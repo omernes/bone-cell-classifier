@@ -15,21 +15,6 @@ classes = ['background', '0_1', '0_2', '0_3', 'g', 'p']
 n_classes = 5
 
 
-# class BoundingBox:
-#     def __init__(self, xmin, xmax, ymin, ymax, label=None):
-#         self.xmin = xmin
-#         self.xmax = xmax
-#         self.ymin = ymin
-#         self.ymax = ymax
-#         self.label = label
-#
-#     def get_box_coordinates(self, is_closed=False):
-#         points = [[self.xmin, self.ymin], [self.xmax, self.ymin], [self.xmax, self.ymax], [self.xmin, self.ymax]]
-#         if is_closed:
-#             points.append([self.xmin, self.ymin])
-#         return np.array(points)
-
-
 class Polygon:
     def __init__(self, label=None, points=None):
         self.label = label
@@ -46,14 +31,6 @@ class Polygon:
             self.box_coordinates = np.array(points)
 
         return self.box_coordinates
-
-    # def get_bounding_box(self):
-    #     if self.points is None or len(self.points) == 0:
-    #         return None
-    #
-    #     xmin, xmax, ymin, ymax = min(self.points[:, 0]), max(self.points[:, 0]), min(self.points[:, 1]), max(
-    #         self.points[:, 1])
-    #     return BoundingBox(xmin, xmax, ymin, ymax)
 
     def get_points(self):
         return self.points
@@ -359,25 +336,15 @@ def create_dataset_split_files(TARGET_DIR, IMAGES_DIR, ANNOTATIONS_DIR):
         f.write("\n".join(test_files) + "\n")
 
 if __name__ == "__main__":
-    DATASET_PATH = os.path.join("data", "raw")
-    TARGET_IMAGES = os.path.join("data_xml", "images")
-    TARGET_ANNOTATIONS = os.path.join("data_xml", "annotations")
+    DATASET_PATH = os.getenv("DATASET_DIR")
 
-    # os.makedirs(DATASET_PATH, exist_ok=True)
+    TARGET_DATASET = os.getenv("TARGET_DATASET_DIR")
+    TARGET_IMAGES = os.path.join(TARGET_DATASET, "images")
+    TARGET_ANNOTATIONS = os.path.join(TARGET_DATASET, "annotations")
+
+    os.makedirs(TARGET_DATASET, exist_ok=True)
     os.makedirs(TARGET_IMAGES, exist_ok=True)
     os.makedirs(TARGET_ANNOTATIONS, exist_ok=True)
 
     create_dataset(DATASET_PATH, TARGET_IMAGES, TARGET_ANNOTATIONS)
-    create_dataset_split_files("data_xml", TARGET_IMAGES, TARGET_ANNOTATIONS)
-
-    # dataset = load_dataset(DATASET_PATH)
-    # img = dataset["B2_03_03"]["image"]
-    #
-    # poly = [Polygon(label="0_1", points=[[100, 100], [200, 100], [200, 150], [100, 150]])]
-    #
-    # # display_image(img, poly)
-    #
-    # img2, poly2 = cut_window_from_image(img, poly, xy=(50, 0))
-    #
-    # display_image(img2, poly2)
-    # display_image(img2, poly2)
+    create_dataset_split_files(TARGET_DATASET, TARGET_IMAGES, TARGET_ANNOTATIONS)
