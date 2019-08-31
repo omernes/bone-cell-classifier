@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 import shutil
 
-from misc_utils.tensor_sampling_utils import sample_tensors
+from ssd_keras.misc_utils.tensor_sampling_utils import sample_tensors
 
 # TODO: Set the path for the source weights file you want to load.
 
